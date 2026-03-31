@@ -1,5 +1,9 @@
 -- ============================================
--- note-app-rn Supabase Schema
+-- ⚠️ DEPRECATED: 이 파일은 참고용입니다.
+-- 실제 DB는 기존 note-app의 Prisma 스키마(camelCase)를 사용합니다.
+-- RLS 정책은 add-rls.sql을 사용하세요.
+-- ============================================
+-- note-app-rn Supabase Schema (snake_case 버전, 참고용)
 -- Migrated from Prisma schema (note-app)
 -- ============================================
 -- NOTE: Account, Session tables are dropped.

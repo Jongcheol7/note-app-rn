@@ -13,9 +13,11 @@ export async function fetchComments(noteNo: number) {
 
 export async function createComment(noteNo: number, content: string, userId: string) {
   if (!supabase) return null;
+  const trimmed = content.trim().slice(0, 1000);
+  if (!trimmed) throw new Error('댓글 내용을 입력해주세요.');
   const { data, error } = await supabase
     .from('comment')
-    .insert({ noteNo, content, userId })
+    .insert({ noteNo, content: trimmed, userId })
     .select('*, user:userId (id, name, nickname, image, profileImage)')
     .single();
   if (error) throw error;

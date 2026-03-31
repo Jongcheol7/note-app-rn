@@ -6,6 +6,7 @@ import { useEffect } from 'react';
 import { useColorScheme } from 'react-native';
 import { Providers } from '@/components/Providers';
 import { OfflineBanner } from '@/components/OfflineBanner';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 import '../global.css';
 
 SplashScreen.preventAutoHideAsync();
@@ -31,6 +32,7 @@ export default function RootLayout() {
   }
 
   return (
+    <ErrorBoundary>
     <Providers>
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
         <OfflineBanner />
@@ -87,5 +89,6 @@ export default function RootLayout() {
         </Stack>
       </ThemeProvider>
     </Providers>
+    </ErrorBoundary>
   );
 }

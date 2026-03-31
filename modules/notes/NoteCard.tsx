@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import {
   View,
   Text,
@@ -10,11 +10,12 @@ import {
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useFromStore } from '@/store/useFromStore';
-import { useTogglePin } from '@/hooks/notes/useNoteMutations';
+import type { Note } from '@/types';
 
 interface NoteCardProps {
-  note: any;
+  note: Note;
   currentUserId?: string;
+  onTogglePin?: (noteNo: number, isPinned: boolean) => void;
 }
 
 function formatDate(dateStr: string) {
@@ -24,11 +25,10 @@ function formatDate(dateStr: string) {
   return `${month}/${day}`;
 }
 
-export default function NoteCard({ note, currentUserId }: NoteCardProps) {
+function NoteCard({ note, currentUserId, onTogglePin }: NoteCardProps) {
   const router = useRouter();
   const menuFrom = useFromStore((s) => s.menuFrom);
   const isDark = useColorScheme() === 'dark';
-  const togglePin = useTogglePin();
 
   const isCommunity = menuFrom === 'community';
   const likeCount = note.like?.length ?? 0;
@@ -40,7 +40,7 @@ export default function NoteCard({ note, currentUserId }: NoteCardProps) {
   };
 
   const handlePin = () => {
-    togglePin.mutate({ noteNo: note.noteNo, isPinned: !note.isPinned });
+    onTogglePin?.(note.noteNo, !note.isPinned);
   };
 
   // Community mode card (Instagram style)
@@ -159,6 +159,8 @@ export default function NoteCard({ note, currentUserId }: NoteCardProps) {
     </Pressable>
   );
 }
+
+export default memo(NoteCard);
 
 const styles = StyleSheet.create({
   // Community card

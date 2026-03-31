@@ -28,10 +28,12 @@ export async function fetchMessages(convNo: number) {
 
 export async function sendMessage(convNo: number, senderId: string, content: string) {
   if (!supabase) return null;
+  const trimmed = content.trim().slice(0, 5000);
+  if (!trimmed) return null;
 
   const { data, error } = await supabase
     .from('message')
-    .insert({ convNo, senderId, content })
+    .insert({ convNo, senderId, content: trimmed })
     .select()
     .single();
   if (error) throw error;

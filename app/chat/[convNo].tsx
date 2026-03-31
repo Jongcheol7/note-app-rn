@@ -49,7 +49,8 @@ export default function ChatRoomScreen() {
     queryKey: ['messages', convNo],
     queryFn: () => fetchMessages(convNo!),
     enabled: !!convNo,
-    refetchInterval: 2000,
+    // Realtime subscription handles live updates; only refetch on focus as fallback
+    refetchOnWindowFocus: true,
   });
 
   // Mark messages as read

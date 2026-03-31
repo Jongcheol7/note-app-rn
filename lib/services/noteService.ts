@@ -1,4 +1,5 @@
 import { supabase } from '../supabase';
+import { sanitizeHtml } from '../utils/sanitize';
 
 const PAGE_SIZE = 10;
 
@@ -14,6 +15,22 @@ interface NoteListParams {
   userId: string;
 }
 
+/**
+ * Purge notes deleted more than 30 days ago.
+ * Should be called separately, not inside query functions.
+ */
+export async function purgeOldTrashNotes(userId: string) {
+  const thirtyDaysAgo = new Date(
+    Date.now() - 30 * 24 * 60 * 60 * 1000
+  ).toISOString();
+  await supabase
+    .from('note')
+    .delete()
+    .eq('userId', userId)
+    .not('delDatetime', 'is', null)
+    .lt('delDatetime', thirtyDaysAgo);
+}
+
 export async function fetchNotes({
   cursor,
   limit = PAGE_SIZE,
@@ -22,19 +39,6 @@ export async function fetchNotes({
   categoryName,
   userId,
 }: NoteListParams) {
-  // Auto-purge: delete notes in trash > 30 days
-  if (menuFrom === 'trash') {
-    const thirtyDaysAgo = new Date(
-      Date.now() - 30 * 24 * 60 * 60 * 1000
-    ).toISOString();
-    await supabase
-      .from('note')
-      .delete()
-      .eq('userId', userId)
-      .not('delDatetime', 'is', null)
-      .lt('delDatetime', thirtyDaysAgo);
-  }
-
   let query = supabase
     .from('note')
     .select(
@@ -148,13 +152,18 @@ export async function saveNote({
   isPublic = false,
   alarmDatetime,
 }: SaveNoteParams) {
+  // Sanitize HTML content before saving
+  const sanitizedContent = sanitizeHtml(content);
+  // Validate input lengths
+  const trimmedTitle = (title || '').slice(0, 200);
+
   if (noteNo) {
     // Update existing
     const { data, error } = await supabase
       .from('note')
       .update({
-        title: title || '',
-        content,
+        title: trimmedTitle,
+        content: sanitizedContent,
         plainText,
         categoryNo: categoryNo === -1 ? null : categoryNo,
         color,
@@ -185,8 +194,8 @@ export async function saveNote({
       .from('note')
       .insert({
         userId,
-        title: title || '',
-        content,
+        title: trimmedTitle,
+        content: sanitizedContent,
         plainText,
         categoryNo: categoryNo === -1 ? null : categoryNo,
         sortOrder,

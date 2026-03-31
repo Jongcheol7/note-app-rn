@@ -6,20 +6,13 @@ import { getDatabase } from './database';
 // NETWORK STATUS
 // ==================
 let isOnline = true;
+let isSyncingRef = false; // Use plain variable instead of useState to avoid closure issues
 
 export function getIsOnline() {
   return isOnline;
 }
 
 export function initNetworkListener(onChange?: (online: boolean) => void) {
-  if (Platform.OS === 'web') {
-    isOnline = navigator.onLine;
-    window.addEventListener('online', () => { isOnline = true; onChange?.(true); });
-    window.addEventListener('offline', () => { isOnline = false; onChange?.(false); });
-    return () => {};
-  }
-
-  // Dynamic import to avoid bundling on web
   const NetInfo = require('@react-native-community/netinfo').default;
   const unsubscribe = NetInfo.addEventListener((state: any) => {
     const online = !!state.isConnected && !!state.isInternetReachable;
@@ -32,35 +25,45 @@ export function initNetworkListener(onChange?: (online: boolean) => void) {
 }
 
 // ==================
-// PULL: Supabase → SQLite
+// PULL: Supabase → SQLite (camelCase from DB → snake_case local cache)
 // ==================
 export async function pullNotes(userId: string) {
-  if (Platform.OS === 'web' || !supabase || !isOnline) return;
+  if (!supabase || !isOnline) return;
 
   const db = await getDatabase();
 
-  // Get last sync time
   const meta = await db.getFirstAsync<{ value: string }>(
     'SELECT value FROM sync_meta WHERE key = ?',
     ['last_note_sync']
   );
   const lastSync = meta?.value || '1970-01-01T00:00:00Z';
 
-  // Fetch updated notes from Supabase
-  const { data: notes, error } = await supabase
-    .from('note')
-    .select('*')
-    .eq('user_id', userId)
-    .gte('mod_datetime', lastSync)
-    .order('mod_datetime', { ascending: false })
-    .limit(200);
+  // Paginated pull to handle large datasets
+  let allNotes: any[] = [];
+  let from = 0;
+  const batchSize = 200;
 
-  if (error || !notes?.length) return;
+  while (true) {
+    const { data: batch, error } = await supabase
+      .from('note')
+      .select('*')
+      .eq('userId', userId)
+      .gte('modDatetime', lastSync)
+      .order('modDatetime', { ascending: false })
+      .range(from, from + batchSize - 1);
+
+    if (error || !batch?.length) break;
+    allNotes = allNotes.concat(batch);
+    if (batch.length < batchSize) break;
+    from += batchSize;
+  }
+
+  if (!allNotes.length) return;
 
   const now = new Date().toISOString();
 
-  // Upsert into local cache
-  for (const note of notes) {
+  // Map camelCase (Supabase) → snake_case (local SQLite cache)
+  for (const note of allNotes) {
     await db.runAsync(
       `INSERT OR REPLACE INTO note_cache
        (note_no, user_id, title, content, plain_text, category_no, sort_order,
@@ -68,43 +71,69 @@ export async function pullNotes(userId: string) {
         del_datetime, is_pinned, pin_datetime, synced_at)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
-        note.note_no, note.user_id, note.title, note.content,
-        note.plain_text, note.category_no, note.sort_order,
-        note.color, note.is_public ? 1 : 0, note.alarm_datetime,
-        note.input_datetime, note.mod_datetime, note.del_datetime,
-        note.is_pinned ? 1 : 0, note.pin_datetime, now,
+        note.noteNo, note.userId, note.title, note.content,
+        note.plainText, note.categoryNo, note.sortOrder,
+        note.color, note.isPublic ? 1 : 0, note.alarmDatetime,
+        note.inputDatetime, note.modDatetime, note.delDatetime,
+        note.isPinned ? 1 : 0, note.pinDatetime, now,
       ]
     );
   }
 
-  // Update sync timestamp
   await db.runAsync(
     'INSERT OR REPLACE INTO sync_meta (key, value) VALUES (?, ?)',
     ['last_note_sync', now]
   );
+
+  // Clean up notes that were hard-deleted on server
+  // (notes in local cache but not on server anymore)
+  const { data: serverIds } = await supabase
+    .from('note')
+    .select('noteNo')
+    .eq('userId', userId);
+
+  if (serverIds) {
+    const serverNoteNos = new Set(serverIds.map((n: any) => n.noteNo));
+    const localNotes = await db.getAllAsync<{ note_no: number }>(
+      'SELECT note_no FROM note_cache WHERE user_id = ?',
+      [userId]
+    );
+    for (const local of localNotes) {
+      if (!serverNoteNos.has(local.note_no)) {
+        await db.runAsync('DELETE FROM note_cache WHERE note_no = ?', [local.note_no]);
+      }
+    }
+  }
 }
 
 export async function pullCategories(userId: string) {
-  if (Platform.OS === 'web' || !supabase || !isOnline) return;
+  if (!supabase || !isOnline) return;
 
   const db = await getDatabase();
   const { data: categories } = await supabase
     .from('category')
     .select('*')
-    .eq('user_id', userId)
-    .order('sort_order');
+    .eq('userId', userId)
+    .order('sortOrder');
 
   if (!categories?.length) return;
 
   const now = new Date().toISOString();
 
-  // Clear and re-insert (categories are small)
-  await db.runAsync('DELETE FROM category_cache WHERE user_id = ?', [userId]);
-  for (const cat of categories) {
-    await db.runAsync(
-      'INSERT INTO category_cache (category_no, name, user_id, sort_order, synced_at) VALUES (?, ?, ?, ?, ?)',
-      [cat.category_no, cat.name, cat.user_id, cat.sort_order, now]
-    );
+  // Use transaction for atomic category sync
+  await db.execAsync('BEGIN TRANSACTION');
+  try {
+    await db.runAsync('DELETE FROM category_cache WHERE user_id = ?', [userId]);
+    for (const cat of categories) {
+      await db.runAsync(
+        'INSERT INTO category_cache (category_no, name, user_id, sort_order, synced_at) VALUES (?, ?, ?, ?, ?)',
+        [cat.categoryNo, cat.name, cat.userId, cat.sortOrder, now]
+      );
+    }
+    await db.execAsync('COMMIT');
+  } catch (e) {
+    await db.execAsync('ROLLBACK');
+    throw e;
   }
 }
 
@@ -112,7 +141,7 @@ export async function pullCategories(userId: string) {
 // PUSH: Offline queue → Supabase
 // ==================
 export async function pushOfflineQueue() {
-  if (Platform.OS === 'web' || !supabase || !isOnline) return;
+  if (!supabase || !isOnline) return;
 
   const db = await getDatabase();
   const pending = await db.getAllAsync<{
@@ -145,13 +174,11 @@ export async function pushOfflineQueue() {
           .eq(payload._matchKey, payload._matchValue);
       }
 
-      // Mark as done
       await db.runAsync(
         'UPDATE offline_queue SET status = ? WHERE id = ?',
         ['completed', item.id]
       );
     } catch (err) {
-      // Retry up to 3 times
       if (item.retries >= 3) {
         await db.runAsync(
           'UPDATE offline_queue SET status = ? WHERE id = ?',
@@ -166,9 +193,9 @@ export async function pushOfflineQueue() {
     }
   }
 
-  // Cleanup completed items
+  // Cleanup completed and old failed items
   await db.runAsync(
-    "DELETE FROM offline_queue WHERE status = 'completed'"
+    "DELETE FROM offline_queue WHERE status IN ('completed', 'failed')"
   );
 }
 
@@ -180,7 +207,6 @@ export async function enqueueAction(
   tableName: string,
   payload: Record<string, any>
 ) {
-  if (Platform.OS === 'web') return;
   const db = await getDatabase();
   await db.runAsync(
     'INSERT INTO offline_queue (action, table_name, payload) VALUES (?, ?, ?)',
@@ -196,11 +222,10 @@ export async function getLocalNotes(userId: string, options?: {
   categoryNo?: number;
   includeDeleted?: boolean;
 }) {
-  if (Platform.OS === 'web') return [];
   const db = await getDatabase();
 
   let sql = 'SELECT * FROM note_cache WHERE user_id = ?';
-  const params: any[] = [userId];
+  const params: (string | number)[] = [userId];
 
   if (!options?.includeDeleted) {
     sql += ' AND del_datetime IS NULL';
@@ -224,7 +249,6 @@ export async function getLocalNotes(userId: string, options?: {
 }
 
 export async function getLocalCategories(userId: string) {
-  if (Platform.OS === 'web') return [];
   const db = await getDatabase();
   return db.getAllAsync(
     'SELECT * FROM category_cache WHERE user_id = ? ORDER BY sort_order',
@@ -233,13 +257,17 @@ export async function getLocalCategories(userId: string) {
 }
 
 // ==================
-// FULL SYNC
+// FULL SYNC (with lock to prevent concurrent syncs)
 // ==================
 export async function fullSync(userId: string) {
-  if (Platform.OS === 'web' || !isOnline) return;
+  if (!isOnline || isSyncingRef) return;
 
-  // Push first, then pull (to avoid overwriting local changes)
-  await pushOfflineQueue();
-  await pullNotes(userId);
-  await pullCategories(userId);
+  isSyncingRef = true;
+  try {
+    await pushOfflineQueue();
+    await pullNotes(userId);
+    await pullCategories(userId);
+  } finally {
+    isSyncingRef = false;
+  }
 }

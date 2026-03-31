@@ -1,5 +1,5 @@
 import 'react-native-url-polyfill/auto';
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { Platform } from 'react-native';
 
 const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL ?? '';
@@ -9,10 +9,21 @@ if (!supabaseUrl || !supabaseAnonKey) {
   console.warn('Supabase URL or Anon Key is missing. Check your .env file.');
 }
 
-// SSR-safe storage: use AsyncStorage on native, localStorage on web (only in browser)
+/**
+ * SSR-safe, secure storage adapter.
+ * - Native: expo-secure-store (encrypted keychain/keystore)
+ * - Web browser: localStorage
+ * - SSR: in-memory fallback
+ */
 function getStorage() {
   if (Platform.OS !== 'web') {
-    return require('@react-native-async-storage/async-storage').default;
+    // Use SecureStore for encrypted token storage on native
+    const SecureStore = require('expo-secure-store');
+    return {
+      getItem: (key: string) => SecureStore.getItemAsync(key),
+      setItem: (key: string, value: string) => SecureStore.setItemAsync(key, value),
+      removeItem: (key: string) => SecureStore.deleteItemAsync(key),
+    };
   }
   // Web: use localStorage if available (not during SSR)
   if (typeof window !== 'undefined' && window.localStorage) {
@@ -27,13 +38,31 @@ function getStorage() {
   };
 }
 
-export const supabase = supabaseUrl
-  ? createClient(supabaseUrl, supabaseAnonKey, {
+let _supabase: SupabaseClient | null = null;
+
+export function getSupabase(): SupabaseClient {
+  if (!_supabase) {
+    if (!supabaseUrl) {
+      throw new Error('Supabase URL is not configured. Check your .env file.');
+    }
+    _supabase = createClient(supabaseUrl, supabaseAnonKey, {
       auth: {
         storage: getStorage(),
         autoRefreshToken: true,
         persistSession: true,
         detectSessionInUrl: Platform.OS === 'web' && typeof window !== 'undefined',
       },
-    })
-  : (null as any);
+    });
+  }
+  return _supabase;
+}
+
+// Lazy-initialized supabase client (backwards compatible export)
+export const supabase: SupabaseClient = supabaseUrl
+  ? getSupabase()
+  : (new Proxy({} as SupabaseClient, {
+      get: () => {
+        console.warn('Supabase client not initialized. Check .env.');
+        return () => ({ data: null, error: new Error('Not initialized') });
+      },
+    }));

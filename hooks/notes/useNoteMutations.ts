@@ -1,4 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { Platform } from 'react-native';
 import { useAuth } from '@/lib/AuthContext';
 import {
   saveNote,

@@ -34,7 +34,8 @@ CREATE POLICY "note_public_read" ON note FOR SELECT
     AND "delDatetime" IS NULL
     AND NOT EXISTS (
       SELECT 1 FROM block
-      WHERE "blockerId" = auth.uid()::text AND "blockedId" = note."userId"
+      WHERE ("blockerId" = auth.uid()::text AND "blockedId" = note."userId")
+         OR ("blockerId" = note."userId" AND "blockedId" = auth.uid()::text)
     )
   );
 
@@ -85,11 +86,14 @@ CREATE POLICY "message_insert" ON message FOR INSERT
     )
   );
 CREATE POLICY "message_update" ON message FOR UPDATE
-  USING (EXISTS (
-    SELECT 1 FROM conversation c
-    WHERE c."convNo" = message."convNo"
-    AND (c."user1Id" = auth.uid()::text OR c."user2Id" = auth.uid()::text)
-  ));
+  USING (
+    "senderId" = auth.uid()::text
+    AND EXISTS (
+      SELECT 1 FROM conversation c
+      WHERE c."convNo" = message."convNo"
+      AND (c."user1Id" = auth.uid()::text OR c."user2Id" = auth.uid()::text)
+    )
+  );
 
 -- Auto-create user profile on Supabase Auth signup
 CREATE OR REPLACE FUNCTION public.handle_new_user()

@@ -18,6 +18,7 @@ import { htmlToPlainText } from '@/lib/utils/htmlToPlainText';
 import NoteDetailHeader from '@/modules/notes/NoteDetailHeader';
 import NoteEditorView, { useNoteEditor } from '@/modules/notes/NoteEditor';
 import NoteToolbar from '@/modules/notes/NoteToolbar';
+import CategorySelector from '@/components/CategorySelector';
 
 export default function NoteWriteScreen() {
   const router = useRouter();
@@ -81,6 +82,8 @@ export default function NoteWriteScreen() {
           isSaving={saveNoteMutation.isPending}
           isNew
         />
+
+        <CategorySelector />
 
         <TextInput
           style={[styles.titleInput, { color: isDark ? '#fff' : '#000' }]}

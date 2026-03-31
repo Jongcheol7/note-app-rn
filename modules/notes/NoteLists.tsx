@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNoteLists } from '@/hooks/notes/useNoteLists';
+import { useTogglePin } from '@/hooks/notes/useNoteMutations';
 import { useFromStore } from '@/store/useFromStore';
 import NoteCard from './NoteCard';
 import CategoryFilter from './CategoryFilter';
@@ -41,6 +42,7 @@ export default function NoteLists() {
 
   const isCommunity = menuFrom === 'community';
   const numColumns = isCommunity ? 1 : width > 768 ? 3 : 2;
+  const togglePin = useTogglePin();
 
   const handleEndReached = useCallback(() => {
     if (hasNextPage && !isFetchingNextPage) {
@@ -48,9 +50,16 @@ export default function NoteLists() {
     }
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
+  const handleTogglePin = useCallback(
+    (noteNo: number, isPinned: boolean) => {
+      togglePin.mutate({ noteNo, isPinned });
+    },
+    [togglePin]
+  );
+
   const renderItem = useCallback(
     ({ item }: { item: any }) => (
-      <NoteCard note={item} currentUserId={user?.id} />
+      <NoteCard note={item} currentUserId={user?.id} onTogglePin={handleTogglePin} />
     ),
     [user?.id]
   );
