@@ -5,8 +5,8 @@ import * as WebBrowser from 'expo-web-browser';
 import { makeRedirectUri } from 'expo-auth-session';
 import { supabase } from './supabase';
 
-// Complete auth session for web
-if (Platform.OS === 'web') {
+// Complete auth session for web (only in browser, not SSR)
+if (Platform.OS === 'web' && typeof window !== 'undefined') {
   WebBrowser.maybeCompleteAuthSession();
 }
 

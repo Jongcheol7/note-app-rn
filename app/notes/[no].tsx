@@ -1,9 +1,10 @@
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback, useState } from 'react';
 import {
   View,
   TextInput,
   Text,
   ActivityIndicator,
+  ScrollView,
   StyleSheet,
   useColorScheme,
   KeyboardAvoidingView,
@@ -21,12 +22,16 @@ import {
   useSaveNote,
   useSoftDeleteNote,
   useTogglePublic,
+  useChangeColor,
 } from '@/hooks/notes/useNoteMutations';
 import { pickImage, uploadImage } from '@/lib/services/imageService';
 import { htmlToPlainText } from '@/lib/utils/htmlToPlainText';
 import NoteDetailHeader from '@/modules/notes/NoteDetailHeader';
 import NoteEditorView, { useNoteEditor } from '@/modules/notes/NoteEditor';
 import NoteToolbar from '@/modules/notes/NoteToolbar';
+import CommentSection from '@/modules/notes/CommentSection';
+import ColorPickerModal from '@/components/ColorPickerModal';
+import AlarmModal from '@/components/AlarmModal';
 
 export default function NoteDetailScreen() {
   const { no } = useLocalSearchParams<{ no: string }>();
@@ -43,6 +48,10 @@ export default function NoteDetailScreen() {
   const saveNote = useSaveNote();
   const softDelete = useSoftDeleteNote();
   const togglePublic = useTogglePublic();
+  const changeColor = useChangeColor();
+
+  const [showColorPicker, setShowColorPicker] = useState(false);
+  const [showAlarmModal, setShowAlarmModal] = useState(false);
 
   const isCommunity = menuFrom === 'community';
   const isOwner = note?.userId === user?.id;
@@ -64,7 +73,6 @@ export default function NoteDetailScreen() {
       store.setIsDirty(false);
       setColor(note.color || '');
 
-      // Set editor content when note loads
       if (note.content) {
         editor.setContent(note.content);
       }
@@ -123,6 +131,23 @@ export default function NoteDetailScreen() {
     togglePublic.mutate({ noteNo, isPublic: newVal });
   };
 
+  const handleColorSelect = (color: string) => {
+    if (!noteNo) return;
+    store.setSelectedColor(color);
+    setColor(color);
+    changeColor.mutate({ noteNo, color });
+  };
+
+  const handleAlarmSet = (datetime: string) => {
+    store.setAlarmDatetime(datetime);
+    store.setIsDirty(true);
+  };
+
+  const handleAlarmClear = () => {
+    store.setAlarmDatetime(null);
+    store.setIsDirty(true);
+  };
+
   if (isLoading) {
     return (
       <SafeAreaView style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -151,6 +176,8 @@ export default function NoteDetailScreen() {
             isNew={false}
             onDelete={handleDelete}
             onTogglePublic={handleTogglePublic}
+            onToggleColor={() => setShowColorPicker(true)}
+            onSetAlarm={() => setShowAlarmModal(true)}
             isPublic={store.isPublic}
           />
         ) : (
@@ -161,25 +188,32 @@ export default function NoteDetailScreen() {
           />
         )}
 
-        {editable ? (
-          <TextInput
-            style={[styles.titleInput, { color: isDark ? '#fff' : '#000' }]}
-            placeholder="제목"
-            placeholderTextColor="#999"
-            value={store.title}
-            onChangeText={store.setTitle}
-            multiline
-            maxLength={200}
-          />
-        ) : (
-          <Text style={[styles.titleText, { color: isDark ? '#fff' : '#000' }]}>
-            {note.title}
-          </Text>
-        )}
+        <ScrollView style={styles.content} keyboardDismissMode="interactive">
+          {editable ? (
+            <TextInput
+              style={[styles.titleInput, { color: isDark ? '#fff' : '#000' }]}
+              placeholder="제목"
+              placeholderTextColor="#999"
+              value={store.title}
+              onChangeText={store.setTitle}
+              multiline
+              maxLength={200}
+            />
+          ) : (
+            <Text style={[styles.titleText, { color: isDark ? '#fff' : '#000' }]}>
+              {note.title}
+            </Text>
+          )}
 
-        <View style={styles.editorContainer}>
-          <NoteEditorView editor={editor} showToolbar={false} />
-        </View>
+          <View style={styles.editorContainer}>
+            <NoteEditorView editor={editor} showToolbar={false} />
+          </View>
+
+          {/* Comment section for public notes */}
+          {(isCommunity || note.isPublic) && noteNo && (
+            <CommentSection noteNo={noteNo} />
+          )}
+        </ScrollView>
 
         {editable && (
           <KeyboardAvoidingView
@@ -189,6 +223,23 @@ export default function NoteDetailScreen() {
             <NoteToolbar editor={editor} onImagePress={handleImageInsert} />
           </KeyboardAvoidingView>
         )}
+
+        {/* Color picker modal */}
+        <ColorPickerModal
+          visible={showColorPicker}
+          currentColor={store.selectedColor}
+          onSelect={handleColorSelect}
+          onClose={() => setShowColorPicker(false)}
+        />
+
+        {/* Alarm modal */}
+        <AlarmModal
+          visible={showAlarmModal}
+          currentAlarm={store.alarmDatetime}
+          onSet={handleAlarmSet}
+          onClear={handleAlarmClear}
+          onClose={() => setShowAlarmModal(false)}
+        />
       </SafeAreaView>
     </AuthGuard>
   );
@@ -196,6 +247,9 @@ export default function NoteDetailScreen() {
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
+  },
+  content: {
     flex: 1,
   },
   titleInput: {
@@ -215,6 +269,7 @@ const styles = StyleSheet.create({
   editorContainer: {
     flex: 1,
     paddingHorizontal: 12,
+    minHeight: 300,
   },
   toolbarWrapper: {
     position: 'absolute',

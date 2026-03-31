@@ -5,6 +5,8 @@ let isOnline = true;
 export function getIsOnline() { return isOnline; }
 
 export function initNetworkListener(onChange?: (online: boolean) => void) {
+  if (typeof window === 'undefined') return () => {};
+
   isOnline = navigator.onLine;
   const onlineHandler = () => { isOnline = true; onChange?.(true); };
   const offlineHandler = () => { isOnline = false; onChange?.(false); };
