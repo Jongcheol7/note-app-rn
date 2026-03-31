@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -9,6 +9,7 @@ import {
   Alert,
   Appearance,
   Linking,
+  Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -26,9 +27,31 @@ export default function SettingsScreen() {
   const { user, signOut } = useAuth();
   const [theme, setTheme] = useState<ThemeMode>(null);
 
+  // Restore saved theme preference
+  useEffect(() => {
+    if (Platform.OS !== 'web') {
+      const AsyncStorage = require('@react-native-async-storage/async-storage').default;
+      AsyncStorage.getItem('theme_preference').then((saved: string | null) => {
+        if (saved === 'light' || saved === 'dark') {
+          setTheme(saved);
+          Appearance.setColorScheme(saved);
+        }
+      }).catch(() => {});
+    }
+  }, []);
+
   const handleThemeChange = (mode: ThemeMode) => {
     setTheme(mode);
     Appearance.setColorScheme(mode);
+    // Persist
+    if (Platform.OS !== 'web') {
+      const AsyncStorage = require('@react-native-async-storage/async-storage').default;
+      if (mode) {
+        AsyncStorage.setItem('theme_preference', mode).catch(() => {});
+      } else {
+        AsyncStorage.removeItem('theme_preference').catch(() => {});
+      }
+    }
   };
 
   const handleDeleteAccount = () => {

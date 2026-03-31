@@ -34,6 +34,11 @@ export default function NoteWriteScreen() {
     return () => store.reset();
   }, []);
 
+  // Mark dirty when image is inserted or editor content changes
+  const markDirty = useCallback(() => {
+    if (!store.isDirty) store.setIsDirty(true);
+  }, [store]);
+
   const handleImageInsert = useCallback(async () => {
     if (!user) return;
     const uri = await pickImage();
@@ -43,6 +48,7 @@ export default function NoteWriteScreen() {
       const result = await uploadImage(uri, user.id, profile?.plan);
       if (result?.url) {
         editor.setImage(result.url);
+        markDirty();
       }
     } catch (e: any) {
       console.error('Image upload failed:', e.message);

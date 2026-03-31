@@ -4,9 +4,11 @@ import {
   ScrollView,
   Pressable,
   Text,
+  TextInput,
   StyleSheet,
   useColorScheme,
   Modal,
+  Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useBridgeState } from '@10play/tentap-editor';
@@ -34,6 +36,8 @@ export default function NoteToolbar({ editor, onImagePress }: NoteToolbarProps) 
   const editorState = useBridgeState(editor);
   const [expanded, setExpanded] = useState(false);
   const [showColorPicker, setShowColorPicker] = useState<'text' | 'highlight' | null>(null);
+  const [showLinkInput, setShowLinkInput] = useState(false);
+  const [linkUrl, setLinkUrl] = useState('');
 
   const bgColor = isDark ? '#1a1a1a' : '#fff';
   const borderColor = isDark ? '#333' : '#e5e5e5';
@@ -179,7 +183,10 @@ export default function NoteToolbar({ editor, onImagePress }: NoteToolbarProps) 
           />
           <ToolBtn
             icon="link-outline"
-            onPress={() => editor.setLink({ href: '' })}
+            onPress={() => {
+              setLinkUrl('');
+              setShowLinkInput(true);
+            }}
             isActive={editorState.isLinkActive}
           />
         </ScrollView>
@@ -231,6 +238,79 @@ export default function NoteToolbar({ editor, onImagePress }: NoteToolbarProps) 
               </Pressable>
             </View>
           </View>
+        </Pressable>
+      </Modal>
+
+      {/* Link URL input modal */}
+      <Modal
+        visible={showLinkInput}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowLinkInput(false)}
+      >
+        <Pressable
+          style={styles.colorModalOverlay}
+          onPress={() => setShowLinkInput(false)}
+        >
+          <Pressable
+            style={[styles.linkModal, { backgroundColor: bgColor }]}
+            onPress={(e) => e.stopPropagation()}
+          >
+            <Text style={[styles.colorPickerTitle, { color: isDark ? '#fff' : '#000' }]}>
+              링크 삽입
+            </Text>
+            <TextInput
+              style={[
+                styles.linkInput,
+                {
+                  color: isDark ? '#fff' : '#000',
+                  backgroundColor: isDark ? '#333' : '#f3f4f6',
+                  borderColor: isDark ? '#555' : '#ddd',
+                },
+              ]}
+              placeholder="https://"
+              placeholderTextColor="#999"
+              value={linkUrl}
+              onChangeText={setLinkUrl}
+              autoFocus
+              autoCapitalize="none"
+              keyboardType="url"
+              onSubmitEditing={() => {
+                if (linkUrl.trim()) {
+                  editor.setLink({ href: linkUrl.trim() });
+                }
+                setShowLinkInput(false);
+              }}
+            />
+            <View style={styles.linkBtnRow}>
+              {editorState.isLinkActive && (
+                <Pressable
+                  onPress={() => {
+                    editor.unsetLink();
+                    setShowLinkInput(false);
+                  }}
+                  style={styles.linkRemoveBtn}
+                >
+                  <Text style={{ color: '#ef4444', fontSize: 14, fontWeight: '500' }}>
+                    링크 제거
+                  </Text>
+                </Pressable>
+              )}
+              <Pressable
+                onPress={() => {
+                  if (linkUrl.trim()) {
+                    editor.setLink({ href: linkUrl.trim() });
+                  }
+                  setShowLinkInput(false);
+                }}
+                style={styles.linkConfirmBtn}
+              >
+                <Text style={{ color: '#fff', fontSize: 14, fontWeight: '600' }}>
+                  확인
+                </Text>
+              </Pressable>
+            </View>
+          </Pressable>
         </Pressable>
       </Modal>
     </View>
@@ -296,5 +376,32 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 1,
     borderColor: '#ddd',
+  },
+  linkModal: {
+    borderRadius: 16,
+    padding: 20,
+    marginHorizontal: 32,
+  },
+  linkInput: {
+    fontSize: 15,
+    padding: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    marginBottom: 12,
+  },
+  linkBtnRow: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: 12,
+  },
+  linkRemoveBtn: {
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+  },
+  linkConfirmBtn: {
+    backgroundColor: '#FF6B6B',
+    paddingVertical: 10,
+    paddingHorizontal: 24,
+    borderRadius: 8,
   },
 });
