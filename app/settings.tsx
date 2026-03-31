@@ -141,7 +141,7 @@ const styles = StyleSheet.create({
   sectionTitle: { fontSize: 13, fontWeight: '600', marginBottom: 8 },
   themeRow: { flexDirection: 'row', borderRadius: 10, padding: 4 },
   themeBtn: { flex: 1, paddingVertical: 10, alignItems: 'center', borderRadius: 8 },
-  themeBtnActive: { backgroundColor: '#000' },
+  themeBtnActive: { backgroundColor: '#FF6B6B' },
   themeBtnText: { fontSize: 14, color: '#666' },
   themeBtnTextActive: { color: '#fff', fontWeight: '600' },
   menuItem: {

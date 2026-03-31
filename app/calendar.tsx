@@ -255,7 +255,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: 18,
   },
-  daySelected: { backgroundColor: '#000' },
+  daySelected: { backgroundColor: '#FF6B6B' },
   dayToday: { backgroundColor: '#e5e7eb' },
   dayText: { fontSize: 14 },
   dot: {

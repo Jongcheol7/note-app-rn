@@ -8,6 +8,8 @@ import {
   Alert,
   Modal,
 } from 'react-native';
+import { hapticMedium } from '@/lib/utils/haptics';
+import { useThemeColors } from '@/lib/theme';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useNoteFormStore } from '@/store/useNoteFormStore';
@@ -193,7 +195,7 @@ const styles = StyleSheet.create({
     padding: 6,
   },
   saveBtn: {
-    backgroundColor: '#000',
+    backgroundColor: '#FF6B6B',
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 8,

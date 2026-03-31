@@ -14,6 +14,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNoteLists } from '@/hooks/notes/useNoteLists';
 import { useTogglePin } from '@/hooks/notes/useNoteMutations';
 import { useFromStore } from '@/store/useFromStore';
+import { useThemeColors } from '@/lib/theme';
+import { NoteListSkeleton } from '@/components/SkeletonLoader';
 import NoteCard from './NoteCard';
 import CategoryFilter from './CategoryFilter';
 import Header from '@/modules/common/Header';
@@ -119,9 +121,7 @@ export default function NoteLists() {
       {!isCommunity && menuFrom !== 'trash' && <CategoryFilter />}
 
       {isLoading ? (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" />
-        </View>
+        <NoteListSkeleton count={6} />
       ) : (
         <FlatList
           data={notes}

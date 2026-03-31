@@ -1,8 +1,9 @@
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { useColorScheme, View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/lib/AuthContext';
+import { useThemeColors } from '@/lib/theme';
 import { fetchUnreadCount } from '@/lib/services/chatService';
 
 function ChatIcon({ color, size, badge }: { color: string; size: number; badge: number }) {
@@ -19,8 +20,7 @@ function ChatIcon({ color, size, badge }: { color: string; size: number; badge: 
 }
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
+  const colors = useThemeColors();
   const { user } = useAuth();
 
   const { data: unreadCount = 0 } = useQuery({
@@ -34,11 +34,11 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: isDark ? '#fff' : '#000',
-        tabBarInactiveTintColor: isDark ? '#888' : '#999',
+        tabBarActiveTintColor: colors.primary,
+        tabBarInactiveTintColor: colors.textTertiary,
         tabBarStyle: {
-          backgroundColor: isDark ? '#1a1a1a' : '#fff',
-          borderTopColor: isDark ? '#333' : '#e5e5e5',
+          backgroundColor: colors.tabBar,
+          borderTopColor: colors.tabBarBorder,
         },
       }}
     >
@@ -64,8 +64,8 @@ export default function TabLayout() {
         name="write"
         options={{
           title: '글쓰기',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="add-circle-outline" size={size} color={color} />
+          tabBarIcon: ({ size }) => (
+            <Ionicons name="add-circle" size={size + 6} color={colors.primary} />
           ),
         }}
       />

@@ -235,7 +235,7 @@ const styles = StyleSheet.create({
   avatarText: { fontSize: 32, fontWeight: '700', color: '#666' },
   cameraIcon: {
     position: 'absolute', bottom: 0, right: 0, width: 28, height: 28,
-    borderRadius: 14, backgroundColor: '#000', justifyContent: 'center', alignItems: 'center',
+    borderRadius: 14, backgroundColor: '#FF6B6B', justifyContent: 'center', alignItems: 'center',
   },
   fieldRow: { width: '100%', marginBottom: 16 },
   editRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 },
@@ -248,6 +248,6 @@ const styles = StyleSheet.create({
   storageBar: { height: 8, backgroundColor: '#e5e7eb', borderRadius: 4, marginBottom: 6 },
   storageBarFill: { height: '100%', backgroundColor: '#3b82f6', borderRadius: 4 },
   storageText: { fontSize: 12, color: '#999', marginBottom: 12 },
-  planBtn: { backgroundColor: '#000', paddingVertical: 10, borderRadius: 8, alignItems: 'center' },
+  planBtn: { backgroundColor: '#FF6B6B', paddingVertical: 10, borderRadius: 8, alignItems: 'center' },
   planBtnText: { color: '#fff', fontSize: 14, fontWeight: '600' },
 });

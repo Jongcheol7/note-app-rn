@@ -163,7 +163,7 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   confirmBtn: {
-    backgroundColor: '#000',
+    backgroundColor: '#FF6B6B',
     paddingVertical: 10,
     paddingHorizontal: 24,
     borderRadius: 8,

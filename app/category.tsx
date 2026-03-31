@@ -325,7 +325,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
   },
   addBtn: {
-    backgroundColor: '#000',
+    backgroundColor: '#FF6B6B',
     paddingVertical: 12,
     borderRadius: 10,
     alignItems: 'center',

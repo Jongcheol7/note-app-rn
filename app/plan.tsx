@@ -123,7 +123,7 @@ const styles = StyleSheet.create({
   featureRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 6 },
   featureText: { fontSize: 14 },
   selectBtn: {
-    backgroundColor: '#000', paddingVertical: 12, borderRadius: 10,
+    backgroundColor: '#FF6B6B', paddingVertical: 12, borderRadius: 10,
     alignItems: 'center', marginTop: 12,
   },
   selectBtnText: { color: '#fff', fontSize: 15, fontWeight: '600' },

@@ -4,12 +4,12 @@ import {
   Text,
   Pressable,
   StyleSheet,
-  useColorScheme,
-  Image,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useFromStore } from '@/store/useFromStore';
+import { useThemeColors, shadows } from '@/lib/theme';
+import Avatar from '@/components/Avatar';
 import type { Note } from '@/types';
 
 interface NoteCardProps {
@@ -28,12 +28,12 @@ function formatDate(dateStr: string) {
 function NoteCard({ note, currentUserId, onTogglePin }: NoteCardProps) {
   const router = useRouter();
   const menuFrom = useFromStore((s) => s.menuFrom);
-  const isDark = useColorScheme() === 'dark';
+  const colors = useThemeColors();
 
   const isCommunity = menuFrom === 'community';
   const likeCount = note.like?.length ?? 0;
   const commentCount = note.comment?.length ?? 0;
-  const bgColor = note.color || (isDark ? '#1a1a1a' : '#fff');
+  const bgColor = note.color || colors.card;
 
   const handlePress = () => {
     router.push(`/notes/${note.noteNo}` as any);
@@ -49,23 +49,20 @@ function NoteCard({ note, currentUserId, onTogglePin }: NoteCardProps) {
     const avatarUrl = author?.profileImage || author?.image;
 
     return (
-      <Pressable onPress={handlePress} style={styles.communityCard}>
+      <Pressable
+        onPress={handlePress}
+        style={[styles.communityCard, { borderBottomColor: colors.borderLight }]}
+        accessibilityRole="button"
+        accessibilityLabel={`${author?.nickname || author?.name || '익명'}의 노트: ${note.title || ''}`}
+      >
         {/* Author header */}
         <View style={styles.authorRow}>
-          {avatarUrl ? (
-            <Image source={{ uri: avatarUrl }} style={styles.avatar} />
-          ) : (
-            <View style={[styles.avatar, styles.avatarPlaceholder]}>
-              <Text style={styles.avatarText}>
-                {(author?.nickname || author?.name || '?')[0]}
-              </Text>
-            </View>
-          )}
+          <Avatar uri={avatarUrl} name={author?.nickname || author?.name} size={36} />
           <View style={{ flex: 1, marginLeft: 10 }}>
-            <Text style={[styles.authorName, isDark && styles.textLight]}>
+            <Text style={[styles.authorName, { color: colors.text }]}>
               {author?.nickname || author?.name || '익명'}
             </Text>
-            <Text style={styles.dateText}>
+            <Text style={[styles.dateText, { color: colors.textTertiary }]}>
               {formatDate(note.inputDatetime)}
             </Text>
           </View>
@@ -74,14 +71,14 @@ function NoteCard({ note, currentUserId, onTogglePin }: NoteCardProps) {
         {/* Content */}
         {note.title ? (
           <Text
-            style={[styles.cardTitle, isDark && styles.textLight]}
+            style={[styles.cardTitle, { color: colors.text }]}
             numberOfLines={2}
           >
             {note.title}
           </Text>
         ) : null}
         <Text
-          style={[styles.cardContent, isDark && styles.textMuted]}
+          style={[styles.cardContent, { color: colors.textSecondary }]}
           numberOfLines={3}
         >
           {note.plainText || ''}
@@ -108,20 +105,29 @@ function NoteCard({ note, currentUserId, onTogglePin }: NoteCardProps) {
       onPress={handlePress}
       style={({ pressed }) => [
         styles.noteCard,
-        { backgroundColor: bgColor, opacity: pressed ? 0.9 : 1 },
+        shadows.card,
+        {
+          backgroundColor: bgColor,
+          borderColor: colors.cardBorder,
+          borderWidth: 1,
+          opacity: pressed ? 0.9 : 1,
+          transform: [{ scale: pressed ? 0.97 : 1 }],
+        },
       ]}
+      accessibilityRole="button"
+      accessibilityLabel={`노트: ${note.title || '제목 없음'}`}
     >
       {/* Pin badge */}
       {note.isPinned && (
         <View style={styles.pinBadge}>
-          <Ionicons name="pin" size={12} color="#f59e0b" />
+          <Ionicons name="pin" size={12} color={colors.warning} />
         </View>
       )}
 
       {/* Title */}
       {note.title ? (
         <Text
-          style={[styles.cardTitle, { color: isDark ? '#fff' : '#000' }]}
+          style={[styles.cardTitle, { color: colors.text }]}
           numberOfLines={2}
         >
           {note.title}
@@ -130,7 +136,7 @@ function NoteCard({ note, currentUserId, onTogglePin }: NoteCardProps) {
 
       {/* Plain text preview */}
       <Text
-        style={[styles.cardContent, { color: isDark ? '#ccc' : '#555' }]}
+        style={[styles.cardContent, { color: colors.textSecondary }]}
         numberOfLines={4}
       >
         {note.plainText || ''}

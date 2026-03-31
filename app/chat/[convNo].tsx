@@ -212,7 +212,7 @@ const styles = StyleSheet.create({
   msgRow: { marginBottom: 8, alignItems: 'flex-start' },
   msgRowMe: { alignItems: 'flex-end' },
   bubble: { maxWidth: '75%', paddingHorizontal: 14, paddingVertical: 10, borderRadius: 16 },
-  bubbleMe: { backgroundColor: '#000', borderBottomRightRadius: 4 },
+  bubbleMe: { backgroundColor: '#FF6B6B', borderBottomRightRadius: 4 },
   bubbleOther: { backgroundColor: '#f3f4f6', borderBottomLeftRadius: 4 },
   msgText: { fontSize: 14, lineHeight: 20, color: '#000' },
   msgMeta: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: 2, paddingHorizontal: 4 },
@@ -224,7 +224,7 @@ const styles = StyleSheet.create({
   },
   input: { flex: 1, fontSize: 14, paddingHorizontal: 14, paddingVertical: 10, borderRadius: 20 },
   sendBtn: {
-    width: 38, height: 38, borderRadius: 19, backgroundColor: '#000',
+    width: 38, height: 38, borderRadius: 19, backgroundColor: '#FF6B6B',
     justifyContent: 'center', alignItems: 'center',
   },
 });
