@@ -7,6 +7,7 @@ import {
   useColorScheme,
   Alert,
   Modal,
+  Platform,
 } from 'react-native';
 import { hapticMedium } from '@/lib/utils/haptics';
 import { useThemeColors } from '@/lib/theme';
@@ -46,14 +47,28 @@ export default function NoteDetailHeader({
   const isDirty = useNoteFormStore((s) => s.isDirty);
   const [showMenu, setShowMenu] = useState(false);
 
+  const goBack = () => {
+    if (router.canGoBack()) {
+      router.back();
+    } else {
+      router.replace('/');
+    }
+  };
+
   const handleBack = () => {
     if (isDirty) {
-      Alert.alert('저장하지 않은 변경사항', '저장하지 않고 나가시겠습니까?', [
-        { text: '취소', style: 'cancel' },
-        { text: '나가기', style: 'destructive', onPress: () => router.back() },
-      ]);
+      if (Platform.OS === 'web') {
+        if (window.confirm('저장하지 않은 변경사항이 있습니다. 나가시겠습니까?')) {
+          goBack();
+        }
+      } else {
+        Alert.alert('저장하지 않은 변경사항', '저장하지 않고 나가시겠습니까?', [
+          { text: '취소', style: 'cancel' },
+          { text: '나가기', style: 'destructive', onPress: goBack },
+        ]);
+      }
     } else {
-      router.back();
+      goBack();
     }
   };
 

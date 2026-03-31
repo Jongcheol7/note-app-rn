@@ -28,7 +28,13 @@ import { pickImage, uploadImage } from '@/lib/services/imageService';
 import { htmlToPlainText } from '@/lib/utils/htmlToPlainText';
 import NoteDetailHeader from '@/modules/notes/NoteDetailHeader';
 import NoteEditorView, { useNoteEditor } from '@/modules/notes/NoteEditor';
-import NoteToolbar from '@/modules/notes/NoteToolbar';
+import WebToolbar from '@/modules/notes/WebToolbar';
+
+// NoteToolbar uses TenTap (WebView) - lazy import to avoid crash on web
+let NoteToolbar: any = () => null;
+if (Platform.OS !== 'web') {
+  NoteToolbar = require('@/modules/notes/NoteToolbar').default;
+}
 import CommentSection from '@/modules/notes/CommentSection';
 import ColorPickerModal from '@/components/ColorPickerModal';
 import AlarmModal from '@/components/AlarmModal';
@@ -52,6 +58,7 @@ export default function NoteDetailScreen() {
 
   const [showColorPicker, setShowColorPicker] = useState(false);
   const [showAlarmModal, setShowAlarmModal] = useState(false);
+  const [saveToast, setSaveToast] = useState(false);
 
   const isCommunity = menuFrom === 'community';
   const isOwner = note?.userId === user?.id;
@@ -113,8 +120,13 @@ export default function NoteDetailScreen() {
         alarmDatetime: store.alarmDatetime,
       });
       store.setIsDirty(false);
-    } catch (e) {
-      console.error('Save failed:', e);
+      setSaveToast(true);
+      setTimeout(() => setSaveToast(false), 2000);
+    } catch (e: any) {
+      console.error('[Save] failed:', e?.message || e);
+      if (Platform.OS === 'web') {
+        window.alert('저장 실패: ' + (e?.message || '알 수 없는 오류'));
+      }
     }
   }, [noteNo, editor, store, saveNote]);
 
@@ -216,12 +228,16 @@ export default function NoteDetailScreen() {
         </ScrollView>
 
         {editable && (
-          <KeyboardAvoidingView
-            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-            style={styles.toolbarWrapper}
-          >
-            <NoteToolbar editor={editor} onImagePress={handleImageInsert} />
-          </KeyboardAvoidingView>
+          Platform.OS === 'web' ? (
+            <WebToolbar onImagePress={handleImageInsert} />
+          ) : (
+            <KeyboardAvoidingView
+              behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+              style={styles.toolbarWrapper}
+            >
+              <NoteToolbar editor={editor} onImagePress={handleImageInsert} />
+            </KeyboardAvoidingView>
+          )
         )}
 
         {/* Color picker modal */}
@@ -240,6 +256,13 @@ export default function NoteDetailScreen() {
           onClear={handleAlarmClear}
           onClose={() => setShowAlarmModal(false)}
         />
+
+        {/* Save toast */}
+        {saveToast && (
+          <View style={styles.toast}>
+            <Text style={styles.toastText}>✓ 저장되었습니다</Text>
+          </View>
+        )}
       </SafeAreaView>
     </AuthGuard>
   );
@@ -253,27 +276,42 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   titleInput: {
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: '700',
-    paddingHorizontal: 16,
-    paddingTop: 16,
-    paddingBottom: 8,
-  },
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 10,
+    outlineStyle: 'none',
+  } as any,
   titleText: {
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: '700',
-    paddingHorizontal: 16,
-    paddingTop: 16,
-    paddingBottom: 8,
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 10,
   },
   editorContainer: {
     flex: 1,
-    paddingHorizontal: 12,
+    paddingHorizontal: 16,
     minHeight: 300,
   },
   toolbarWrapper: {
     position: 'absolute',
     width: '100%',
     bottom: 0,
+  },
+  toast: {
+    position: 'absolute',
+    bottom: 80,
+    alignSelf: 'center',
+    backgroundColor: 'rgba(0,0,0,0.8)',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 20,
+  },
+  toastText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '500',
   },
 });

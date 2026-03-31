@@ -1,87 +1,118 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import {
   View,
   Text,
   ScrollView,
   Pressable,
   StyleSheet,
-  useColorScheme,
+  Animated,
 } from 'react-native';
 import { useCategoryStore } from '@/store/useCategoryStore';
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/lib/supabase';
-import { useAuth } from '@/lib/AuthContext';
+import { useCategoryList } from '@/hooks/category/useCategoryHooks';
+import { useThemeColors } from '@/lib/theme';
 
-export default function CategoryFilter() {
-  const { user } = useAuth();
-  const isDark = useColorScheme() === 'dark';
-  const { categoryName, setCategoryName } = useCategoryStore();
+function CategoryChip({
+  name,
+  isActive,
+  onPress,
+  colors,
+}: {
+  name: string;
+  isActive: boolean;
+  onPress: () => void;
+  colors: any;
+}) {
+  const scaleAnim = useRef(new Animated.Value(1)).current;
 
-  const { data: categories = [] } = useQuery({
-    queryKey: ['categories'],
-    queryFn: async () => {
-      if (!supabase || !user) return [];
-      const { data } = await supabase
-        .from('category')
-        .select('category_no, name')
-        .eq('user_id', user.id)
-        .order('sort_order');
-      return data ?? [];
-    },
-    enabled: !!user,
-  });
+  const onPressIn = () => {
+    Animated.spring(scaleAnim, {
+      toValue: 0.92,
+      useNativeDriver: false,
+    }).start();
+  };
 
-  const allItems = [{ name: '전체', category_no: 0 }, ...categories];
+  const onPressOut = () => {
+    Animated.spring(scaleAnim, {
+      toValue: 1,
+      friction: 4,
+      useNativeDriver: false,
+    }).start();
+  };
 
   return (
-    <ScrollView
-      horizontal
-      showsHorizontalScrollIndicator={false}
-      contentContainerStyle={styles.container}
-    >
-      {allItems.map((cat) => {
-        const isActive =
-          cat.categoryNo === 0 ? categoryName === '' : categoryName === cat.name;
+    <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
+      <Pressable
+        onPress={onPress}
+        onPressIn={onPressIn}
+        onPressOut={onPressOut}
+        style={[
+          styles.chip,
+          isActive
+            ? styles.chipActive
+            : { backgroundColor: colors.inputBackground },
+        ]}
+      >
+        <Text
+          style={[
+            styles.chipText,
+            isActive
+              ? styles.chipTextActive
+              : { color: colors.textSecondary },
+          ]}
+        >
+          {name}
+        </Text>
+      </Pressable>
+    </Animated.View>
+  );
+}
 
-        return (
-          <Pressable
-            key={cat.categoryNo}
-            onPress={() =>
-              setCategoryName(cat.categoryNo === 0 ? '' : cat.name)
-            }
-            style={[
-              styles.chip,
-              isActive && styles.chipActive,
-              !isActive && {
-                backgroundColor: isDark ? '#333' : '#f3f4f6',
-              },
-            ]}
-          >
-            <Text
-              style={[
-                styles.chipText,
-                isActive && styles.chipTextActive,
-                !isActive && { color: isDark ? '#ccc' : '#555' },
-              ]}
-            >
-              {cat.name}
-            </Text>
-          </Pressable>
-        );
-      })}
-    </ScrollView>
+export default function CategoryFilter() {
+  const colors = useThemeColors();
+  const { categoryName, setCategoryName } = useCategoryStore();
+  const { data: categories = [] } = useCategoryList();
+
+  const allItems = [{ name: '전체', categoryNo: 0 }, ...categories];
+
+  return (
+    <View style={[styles.wrapper, { borderBottomColor: colors.borderLight }]}>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.container}
+      >
+        {allItems.map((cat) => {
+          const isActive =
+            cat.categoryNo === 0 ? categoryName === '' : categoryName === cat.name;
+
+          return (
+            <CategoryChip
+              key={cat.categoryNo}
+              name={cat.name}
+              isActive={isActive}
+              onPress={() => setCategoryName(cat.categoryNo === 0 ? '' : cat.name)}
+              colors={colors}
+            />
+          );
+        })}
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  wrapper: {
+    borderBottomWidth: 1,
+  },
   container: {
     paddingHorizontal: 16,
-    paddingVertical: 8,
+    paddingVertical: 12,
     gap: 8,
+    alignItems: 'center',
   },
   chip: {
-    paddingHorizontal: 14,
-    paddingVertical: 7,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
     borderRadius: 20,
   },
   chipActive: {
@@ -90,6 +121,7 @@ const styles = StyleSheet.create({
   chipText: {
     fontSize: 13,
     fontWeight: '500',
+    lineHeight: 16,
   },
   chipTextActive: {
     color: '#fff',

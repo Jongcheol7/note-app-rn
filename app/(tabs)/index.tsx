@@ -1,12 +1,12 @@
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useColorScheme } from 'react-native';
 import { AuthGuard } from '@/components/AuthGuard';
 import { useFromStore } from '@/store/useFromStore';
+import { useThemeColors } from '@/lib/theme';
 import NoteLists from '@/modules/notes/NoteLists';
 import { useEffect } from 'react';
 
 export default function HomeScreen() {
-  const isDark = useColorScheme() === 'dark';
+  const colors = useThemeColors();
   const setMenuFrom = useFromStore((s) => s.setMenuFrom);
 
   useEffect(() => {
@@ -16,7 +16,7 @@ export default function HomeScreen() {
   return (
     <AuthGuard showLogin>
       <SafeAreaView
-        style={{ flex: 1, backgroundColor: isDark ? '#000' : '#fff' }}
+        style={{ flex: 1, backgroundColor: colors.background }}
         edges={['top']}
       >
         <NoteLists />

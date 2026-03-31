@@ -17,7 +17,12 @@ import { pickImage, uploadImage } from '@/lib/services/imageService';
 import { htmlToPlainText } from '@/lib/utils/htmlToPlainText';
 import NoteDetailHeader from '@/modules/notes/NoteDetailHeader';
 import NoteEditorView, { useNoteEditor } from '@/modules/notes/NoteEditor';
-import NoteToolbar from '@/modules/notes/NoteToolbar';
+import WebToolbar from '@/modules/notes/WebToolbar';
+
+let NoteToolbar: any = () => null;
+if (Platform.OS !== 'web') {
+  NoteToolbar = require('@/modules/notes/NoteToolbar').default;
+}
 import CategorySelector from '@/components/CategorySelector';
 
 export default function NoteWriteScreen() {
@@ -105,12 +110,16 @@ export default function NoteWriteScreen() {
           <NoteEditorView editor={editor} showToolbar={false} />
         </View>
 
-        <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          style={styles.toolbarWrapper}
-        >
-          <NoteToolbar editor={editor} onImagePress={handleImageInsert} />
-        </KeyboardAvoidingView>
+        {Platform.OS === 'web' ? (
+          <WebToolbar onImagePress={handleImageInsert} />
+        ) : (
+          <KeyboardAvoidingView
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            style={styles.toolbarWrapper}
+          >
+            <NoteToolbar editor={editor} onImagePress={handleImageInsert} />
+          </KeyboardAvoidingView>
+        )}
       </SafeAreaView>
     </AuthGuard>
   );

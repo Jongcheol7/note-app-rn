@@ -10,7 +10,6 @@ import {
   Toolbar,
   useEditorBridge,
   TenTapStartKit,
-  CoreBridge,
   PlaceholderBridge,
   ImageBridge,
   TaskListBridge,
@@ -22,60 +21,29 @@ import {
   darkEditorCss,
 } from '@10play/tentap-editor';
 
-interface NoteEditorProps {
-  initialContent?: string;
-  editable?: boolean;
-  onEditorReady?: (editor: ReturnType<typeof useEditorBridge>) => void;
-}
-
-// Custom CSS to match original app's editor styling
 const customCSS = `
-  * {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  }
-  .ProseMirror {
-    padding: 0 4px;
-    line-height: 1.7;
-    min-height: 300px;
-  }
-  .ProseMirror p {
-    margin: 0.5em 0;
-  }
+  * { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+  .ProseMirror { padding: 0 4px; line-height: 1.7; min-height: 300px; }
+  .ProseMirror p { margin: 0.5em 0; }
   .ProseMirror h1 { font-size: 28px; font-weight: 700; }
   .ProseMirror h2 { font-size: 22px; font-weight: 700; }
   .ProseMirror h3 { font-size: 18px; font-weight: 700; }
-  .ProseMirror blockquote {
-    border-left: 3px solid rgba(0,0,0,0.25);
-    padding-left: 1rem;
-    margin-left: 0;
-  }
-  .ProseMirror hr {
-    border: none;
-    border-top: 2px solid rgba(0,0,0,0.12);
-    margin: 1em 0;
-  }
+  .ProseMirror blockquote { border-left: 3px solid rgba(0,0,0,0.25); padding-left: 1rem; margin-left: 0; }
+  .ProseMirror hr { border: none; border-top: 2px solid rgba(0,0,0,0.12); margin: 1em 0; }
   .ProseMirror a { color: #3b82f6; text-decoration: underline; }
   .ProseMirror ul, .ProseMirror ol { padding-left: 1.5rem; }
-  .ProseMirror ul[data-type="taskList"] {
-    list-style: none;
-    padding-left: 0;
-  }
-  .ProseMirror ul[data-type="taskList"] li {
-    display: flex;
-    align-items: flex-start;
-    gap: 0.5rem;
-  }
-  .ProseMirror img {
-    max-width: 100%;
-    height: auto;
-    border-radius: 4px;
-  }
+  .ProseMirror img { max-width: 100%; height: auto; border-radius: 4px; }
 `;
+
+interface UseNoteEditorOptions {
+  initialContent?: string;
+  editable?: boolean;
+}
 
 export function useNoteEditor({
   initialContent = '',
   editable = true,
-}: Omit<NoteEditorProps, 'onEditorReady'> = {}) {
+}: UseNoteEditorOptions = {}) {
   const isDark = useColorScheme() === 'dark';
 
   const editor = useEditorBridge({
@@ -91,9 +59,7 @@ export function useNoteEditor({
       ImageBridge,
       TaskListBridge,
       ColorBridge,
-      HighlightBridge.configureExtension({
-        multicolor: true,
-      }),
+      HighlightBridge.configureExtension({ multicolor: true }),
       UnderlineBridge,
       LinkBridge,
     ],

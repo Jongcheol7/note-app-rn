@@ -5,7 +5,7 @@ import {
   FlatList,
   ActivityIndicator,
   StyleSheet,
-  useColorScheme,
+  Platform,
   useWindowDimensions,
   Pressable,
   RefreshControl,
@@ -23,8 +23,8 @@ import { useAuth } from '@/lib/AuthContext';
 
 export default function NoteLists() {
   const { user } = useAuth();
-  const isDark = useColorScheme() === 'dark';
   const menuFrom = useFromStore((s) => s.menuFrom);
+  const colors = useThemeColors();
   const { width } = useWindowDimensions();
 
   const {
@@ -43,7 +43,7 @@ export default function NoteLists() {
   );
 
   const isCommunity = menuFrom === 'community';
-  const numColumns = isCommunity ? 1 : width > 768 ? 3 : 2;
+  const numColumns = isCommunity ? 1 : width > 1024 ? 4 : width > 768 ? 3 : 2;
   const togglePin = useTogglePin();
 
   const handleEndReached = useCallback(() => {
@@ -84,9 +84,9 @@ export default function NoteLists() {
         <Ionicons
           name={emptyIcon as any}
           size={48}
-          color={isDark ? '#555' : '#ccc'}
+          color={colors.textDisabled}
         />
-        <Text style={[styles.emptyText, { color: isDark ? '#666' : '#999' }]}>
+        <Text style={[styles.emptyText, { color: colors.textTertiary }]}>
           {emptyMsg}
         </Text>
       </View>
@@ -105,57 +105,68 @@ export default function NoteLists() {
   if (isError) {
     return (
       <View style={styles.emptyContainer}>
-        <Text style={{ color: '#ef4444', marginBottom: 12 }}>
+        <Text style={{ color: colors.error, marginBottom: 12 }}>
           데이터를 불러오는데 실패했습니다
         </Text>
         <Pressable onPress={() => refetch()}>
-          <Text style={{ color: '#3b82f6' }}>다시 시도</Text>
+          <Text style={{ color: colors.accent }}>다시 시도</Text>
         </Pressable>
       </View>
     );
   }
 
-  return (
-    <View style={{ flex: 1 }}>
-      <Header />
-      {!isCommunity && menuFrom !== 'trash' && <CategoryFilter />}
+  // Web: center content with max-width
+  const isWeb = Platform.OS === 'web';
+  const maxWidth = isWeb ? 1200 : undefined;
 
-      {isLoading ? (
-        <NoteListSkeleton count={6} />
-      ) : (
-        <FlatList
-          data={notes}
-          renderItem={renderItem}
-          refreshControl={
-            <RefreshControl refreshing={false} onRefresh={() => refetch()} />
-          }
-          keyExtractor={(item) => String(item.noteNo)}
-          numColumns={numColumns}
-          key={`list-${numColumns}`}
-          contentContainerStyle={[
-            styles.listContent,
-            notes.length === 0 && { flex: 1 },
-          ]}
-          onEndReached={handleEndReached}
-          onEndReachedThreshold={0.3}
-          ListEmptyComponent={renderEmpty}
-          ListFooterComponent={renderFooter}
-          showsVerticalScrollIndicator={false}
-        />
-      )}
+  return (
+    <View style={[styles.outer, { backgroundColor: colors.background }]}>
+      <View style={[styles.inner, maxWidth ? { maxWidth, width: '100%' } : undefined]}>
+        <Header />
+        {!isCommunity && menuFrom !== 'trash' && <CategoryFilter />}
+
+        {isLoading ? (
+          <NoteListSkeleton count={6} />
+        ) : (
+          <FlatList
+            data={notes}
+            renderItem={renderItem}
+            refreshControl={
+              <RefreshControl refreshing={false} onRefresh={() => refetch()} />
+            }
+            keyExtractor={(item) => String(item.noteNo)}
+            numColumns={numColumns}
+            key={`list-${numColumns}`}
+            contentContainerStyle={[
+              styles.listContent,
+              notes.length === 0 && { flex: 1 },
+            ]}
+            onEndReached={handleEndReached}
+            onEndReachedThreshold={0.3}
+            ListEmptyComponent={renderEmpty}
+            ListFooterComponent={renderFooter}
+            showsVerticalScrollIndicator={false}
+          />
+        )}
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  listContent: {
-    paddingHorizontal: 12,
-    paddingBottom: 20,
-  },
-  loadingContainer: {
+  outer: {
     flex: 1,
-    justifyContent: 'center',
     alignItems: 'center',
+  },
+  inner: {
+    flex: 1,
+    alignSelf: 'center',
+    width: '100%',
+  },
+  listContent: {
+    paddingHorizontal: 16,
+    paddingBottom: 20,
+    paddingTop: 8,
   },
   emptyContainer: {
     flex: 1,

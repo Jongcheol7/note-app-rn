@@ -408,3 +408,77 @@
 - 온보딩 화면
 - 커스텀 폰트 (Pretendard)
 - 앱 아이콘 + 스토어 에셋 디자인
+
+---
+
+## 11. 야간 작업 (3/31 23:00 ~ 4/1 00:10)
+
+### 환경 설정
+- [x] GitHub에서 프로젝트 clone
+- [x] npm install (axios, expo-av, expo-crypto 미사용 의존성 제거)
+- [x] .env 설정 (Supabase URL + Anon Key)
+- [x] Google OAuth 설정 (Web client ID + Supabase 연동)
+- [x] Supabase add-rls.sql 실행 (RLS 정책 + handle_new_user 트리거)
+- [x] 기존 유저 ID 마이그레이션 (NextAuth cuid → Supabase Auth UUID 전체 테이블 업데이트)
+
+### 버그 수정
+- [x] **AuthContext.tsx** — `profile_image` → `profileImage` (DB는 camelCase, 코드가 snake_case로 잘못됨)
+- [x] **CategoryFilter.tsx** — snake_case 직접 쿼리 제거, 기존 `useCategoryList` 훅 사용으로 교체
+- [x] **NoteEditor 웹 호환** — TenTap(WebView) 웹 미지원 → 플랫폼 분리 파일 생성
+  - `NoteEditor.web.tsx`: contentEditable 기반 웹 에디터
+  - `NoteEditor.native.tsx`: 기존 TenTap 에디터
+- [x] **NoteToolbar 웹 크래시** — `useBridgeState` 웹 미지원 → 네이티브에서만 lazy require, 웹용 `WebToolbar.tsx` 생성
+- [x] **NoteDetailHeader 뒤로가기** — 웹에서 `router.back()` 실패 → `router.canGoBack()` 체크 + fallback to `/`
+- [x] **제목 입력 검은 테두리** — 웹 focus outline 제거 (`outlineStyle: 'none'`)
+- [x] **검색바 검은 테두리** — 동일하게 outline 제거
+- [x] **저장 완료 피드백 없음** — 저장 성공 시 토스트 메시지 추가 ("✓ 저장되었습니다")
+
+### 웹 UI/UX 개선
+- [x] **배경색** — `#fff` → `#FFFBF0` (테마 크림색 적용)
+- [x] **레이아웃** — 웹에서 max-width 1200px 중앙 정렬, 4열 그리드 지원
+- [x] **NoteCard** — 고정 높이 190px, 콘텐츠/푸터 분리, 텍스트 overflow 처리
+- [x] **카드 날짜** — `3/28` → `2026.3.28` (년도 포함)
+- [x] **카테고리 칩** — View wrapper로 잘림 방지, 테마 컬러 적용
+- [x] **검색바** — 돋보기 클릭 시 풀 width 검색바로 전환 + 취소 버튼
+- [x] **헤더** — 테마 토큰 전체 적용 (배경, 텍스트, 아이콘 컬러)
+
+### 애니메이션 추가
+- [x] **검색바** — 페이드인/아웃 전환 애니메이션
+- [x] **NoteCard** — 등장 시 슬라이드업 + 페이드인
+- [x] **카테고리 칩** — 프레스 시 스프링 스케일 애니메이션
+
+### 파일 변경 목록
+
+| 파일 | 변경 내용 |
+|------|-----------|
+| `package.json` | axios, expo-av, expo-crypto 제거 |
+| `.env` | Supabase + R2 키 설정 |
+| `lib/AuthContext.tsx` | profile_image → profileImage |
+| `modules/notes/CategoryFilter.tsx` | snake_case 쿼리 → useCategoryList 훅, 애니메이션 추가 |
+| `modules/notes/NoteEditor.web.tsx` | **신규** — 웹용 contentEditable 에디터 |
+| `modules/notes/NoteEditor.native.tsx` | **신규** — 네이티브 TenTap 에디터 (기존 코드 분리) |
+| `modules/notes/NoteEditor.tsx` | **삭제** — Metro 플랫폼 resolution으로 대체 |
+| `modules/notes/WebToolbar.tsx` | **신규** — 웹용 서식 툴바 (B/I/U/S/리스트) |
+| `modules/notes/NoteCard.tsx` | 카드 디자인 개선, 등장 애니메이션, 날짜 포맷 |
+| `modules/notes/NoteLists.tsx` | max-width 레이아웃, 4열 지원, 테마 적용 |
+| `modules/notes/NoteDetailHeader.tsx` | 웹 뒤로가기 수정, Platform import 추가 |
+| `modules/common/Header.tsx` | 검색바 리디자인, 애니메이션, 테마 적용 |
+| `app/(tabs)/index.tsx` | 배경색 테마 적용 |
+| `app/notes/[no].tsx` | 웹 툴바 분기, 저장 토스트, 제목 스타일 개선 |
+| `app/notes/write.tsx` | 웹 툴바 분기 |
+
+### 미해결 이슈 (다음 작업)
+
+| # | 이슈 | 우선순위 | 비고 |
+|---|------|----------|------|
+| 1 | 이미지 업로드 R2 연동 | P0 | Supabase Edge Function 또는 Cloudflare Worker 필요 |
+| 2 | 웹 에디터 서식 보존 | P1 | contentEditable 기본 기능만, TipTap 웹 직접 통합 검토 |
+| 3 | 웹 전반 반응형 폴리시 | P1 | 모바일 웹 뷰포트 대응 필요 |
+| 4 | 알람 모달 DateTimePicker 교체 | P0 | 회의 즉시 착수 항목 |
+| 5 | 접근성 라벨 전체 추가 | P0 | 디자인팀 협업 |
+| 6 | 크래시 리포팅 (Sentry) | P0 | 계정 필요 |
+
+### Supabase DB 작업 완료
+- [x] add-rls.sql 전체 실행 (RLS 정책 + 트리거)
+- [x] 기존 유저 ID 마이그레이션: `cmbp7q6lh0000l5045oqogqsy` → `659dbda4-3d98-40be-a9dd-a72197a3c4dc`
+  - user, note, category, comment, like, image, report, block, conversation, message, UserSettings, account, session 전체 업데이트
