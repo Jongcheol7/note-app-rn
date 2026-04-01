@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback, useState, useRef } from 'react';
+import React, { useEffect, useCallback, useState } from 'react';
 import {
   View,
   TextInput,
@@ -40,8 +40,6 @@ import ColorPickerModal from '@/components/ColorPickerModal';
 import AlarmModal from '@/components/AlarmModal';
 import NoteHistoryModal from '@/modules/notes/NoteHistoryModal';
 
-const AUTO_SAVE_DELAY = 3000;
-
 export default function NoteDetailScreen() {
   const { no } = useLocalSearchParams<{ no: string }>();
   const noteNo = no ? parseInt(no, 10) : null;
@@ -63,8 +61,6 @@ export default function NoteDetailScreen() {
   const [showAlarmModal, setShowAlarmModal] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
   const [saveToast, setSaveToast] = useState(false);
-  const autoSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const isSavingRef = useRef(false);
 
   const isCommunity = menuFrom === 'community';
   const isOwner = note?.userId === user?.id;
@@ -93,23 +89,17 @@ export default function NoteDetailScreen() {
     return () => {
       store.reset();
       setColor('');
-      if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
     };
   }, [note?.noteNo]);
 
-  // Save function (reusable)
+  // 저장 실행
   const performSave = useCallback(async (showToast = true) => {
-    if (!noteNo || isSavingRef.current) return;
-    isSavingRef.current = true;
+    if (!noteNo) return;
     try {
       const content = await editor.getHTML();
       const plainText = htmlToPlainText(content);
 
-      // 내용이 비어있으면 저장하지 않음
-      if (!store.title.trim() && !plainText.trim()) {
-        isSavingRef.current = false;
-        return;
-      }
+      if (!store.title.trim() && !plainText.trim()) return;
 
       await saveNote.mutateAsync({
         noteNo,
@@ -128,31 +118,17 @@ export default function NoteDetailScreen() {
       }
     } catch (e: any) {
       console.error('[Save] failed:', e?.message || e);
-    } finally {
-      isSavingRef.current = false;
     }
   }, [noteNo, editor, store, saveNote]);
 
-  // 자동 저장: 제목이나 내용 변경 시 3초 디바운스
-  const triggerAutoSave = useCallback(() => {
-    if (!editable) return;
-    store.setIsDirty(true);
-    if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
-    autoSaveTimer.current = setTimeout(() => {
-      performSave(false);
-    }, AUTO_SAVE_DELAY);
-  }, [editable, performSave, store]);
-
-  // 제목 변경 시 자동 저장 트리거
+  // 제목 변경 시 dirty 마킹
   const handleTitleChange = useCallback((text: string) => {
     store.setTitle(text);
-    triggerAutoSave();
-  }, [store, triggerAutoSave]);
+    store.setIsDirty(true);
+  }, [store]);
 
-  // 뒤로가기: dirty면 자동 저장 후 이동
+  // 뒤로가기: 변경사항 있으면 자동 저장 후 이동
   const handleBack = useCallback(async () => {
-    if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
-
     if (editable && store.isDirty) {
       await performSave(false);
     }
@@ -172,16 +148,15 @@ export default function NoteDetailScreen() {
       const result = await uploadImage(uri, user.id, profile?.plan);
       if (result?.url) {
         editor.setImage(result.url);
-        triggerAutoSave();
+        store.setIsDirty(true);
       }
     } catch (e: any) {
       console.error('Image upload failed:', e.message);
     }
-  }, [user, profile, editor, triggerAutoSave]);
+  }, [user, profile, editor, store]);
 
   const handleDelete = async () => {
     if (!noteNo) return;
-    if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
     await softDelete.mutateAsync(noteNo);
     router.back();
   };
@@ -202,12 +177,12 @@ export default function NoteDetailScreen() {
 
   const handleAlarmSet = (datetime: string) => {
     store.setAlarmDatetime(datetime);
-    triggerAutoSave();
+    store.setIsDirty(true);
   };
 
   const handleAlarmClear = () => {
     store.setAlarmDatetime(null);
-    triggerAutoSave();
+    store.setIsDirty(true);
   };
 
   // 히스토리에서 복원 후 에디터 업데이트
