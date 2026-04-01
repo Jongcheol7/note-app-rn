@@ -84,6 +84,7 @@ export default function NoteWriteScreen() {
   }, [editor, store, saveNoteMutation, router]);
 
   const bgColor = store.selectedColor || (isDark ? '#000' : '#fff');
+  const isWeb = Platform.OS === 'web';
 
   return (
     <AuthGuard showLogin>
@@ -94,6 +95,7 @@ export default function NoteWriteScreen() {
           isNew
         />
 
+        <View style={isWeb ? styles.webContent : undefined}>
         <CategorySelector />
 
         <TextInput
@@ -108,6 +110,7 @@ export default function NoteWriteScreen() {
 
         <View style={styles.editorContainer}>
           <NoteEditorView editor={editor} showToolbar={false} />
+        </View>
         </View>
 
         {Platform.OS === 'web' ? (
@@ -129,6 +132,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  webContent: {
+    flex: 1,
+    maxWidth: 800,
+    width: '100%',
+    alignSelf: 'center',
+  } as any,
   titleInput: {
     fontSize: 22,
     fontWeight: '700',

@@ -12,6 +12,9 @@ const STORAGE_LIMITS: Record<string, number> = {
   unlimited: Infinity,
 };
 
+const R2_WORKER_URL = process.env.EXPO_PUBLIC_R2_WORKER_URL || '';
+const R2_API_KEY = process.env.EXPO_PUBLIC_R2_API_KEY || '';
+
 export async function pickImage(): Promise<string | null> {
   const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
   if (status !== 'granted') return null;
@@ -33,6 +36,41 @@ export async function compressImage(uri: string) {
     { compress: 0.7, format: ImageManipulator.SaveFormat.JPEG }
   );
   return result;
+}
+
+async function uploadToR2(
+  fileBody: Blob | ArrayBuffer,
+  fileName: string
+): Promise<string> {
+  const body = fileBody instanceof Blob ? await fileBody.arrayBuffer() : fileBody;
+
+  const response = await fetch(`${R2_WORKER_URL}/${fileName}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'image/jpeg',
+      Authorization: `Bearer ${R2_API_KEY}`,
+    },
+    body,
+  });
+
+  if (!response.ok) {
+    throw new Error(`R2 upload failed: ${response.status}`);
+  }
+
+  const data = await response.json();
+  return data.url;
+}
+
+async function deleteFromR2(fileUrl: string): Promise<void> {
+  const url = new URL(fileUrl);
+  const key = url.pathname.slice(1);
+
+  await fetch(`${R2_WORKER_URL}/${key}`, {
+    method: 'DELETE',
+    headers: {
+      Authorization: `Bearer ${R2_API_KEY}`,
+    },
+  });
 }
 
 export async function uploadImage(
@@ -67,40 +105,52 @@ export async function uploadImage(
     fileBody = await response.arrayBuffer();
   }
 
-  const { data, error } = await supabase.storage
-    .from('notes')
-    .upload(fileName, fileBody, {
-      contentType: 'image/jpeg',
-      upsert: false,
-    });
-
-  if (error) throw error;
-
-  const { data: urlData } = supabase.storage
-    .from('notes')
-    .getPublicUrl(data.path);
-
   const fileSize = fileBody instanceof Blob ? fileBody.size : fileBody.byteLength;
+  let publicUrl: string;
+
+  if (R2_WORKER_URL) {
+    // R2 업로드
+    publicUrl = await uploadToR2(fileBody, fileName);
+  } else {
+    // Supabase Storage 폴백
+    const { data, error } = await supabase.storage
+      .from('notes')
+      .upload(fileName, fileBody, {
+        contentType: 'image/jpeg',
+        upsert: false,
+      });
+
+    if (error) throw error;
+
+    const { data: urlData } = supabase.storage
+      .from('notes')
+      .getPublicUrl(data.path);
+
+    publicUrl = urlData.publicUrl;
+  }
 
   await supabase.from('image').insert({
     userId,
-    fileUrl: urlData.publicUrl,
+    fileUrl: publicUrl,
     fileSize,
   });
 
-  return { url: urlData.publicUrl, fileSize };
+  return { url: publicUrl, fileSize };
 }
 
 export async function deleteImage(fileUrl: string, userId: string) {
   if (!supabase) return;
 
-  const url = new URL(fileUrl);
-  const pathParts = url.pathname.split('/storage/v1/object/public/notes/');
-  if (pathParts.length < 2) return;
+  if (R2_WORKER_URL && fileUrl.includes(R2_WORKER_URL)) {
+    await deleteFromR2(fileUrl);
+  } else {
+    const url = new URL(fileUrl);
+    const pathParts = url.pathname.split('/storage/v1/object/public/notes/');
+    if (pathParts.length >= 2) {
+      await supabase.storage.from('notes').remove([pathParts[1]]);
+    }
+  }
 
-  const filePath = pathParts[1];
-
-  await supabase.storage.from('notes').remove([filePath]);
   await supabase
     .from('image')
     .delete()

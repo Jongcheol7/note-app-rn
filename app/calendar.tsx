@@ -88,10 +88,10 @@ export default function CalendarScreen() {
       >
         {/* Header */}
         <View style={[styles.header, { borderBottomColor: isDark ? '#333' : '#eee' }]}>
-          <Pressable onPress={() => router.back()} style={{ padding: 6 }}>
+          <Pressable onPress={() => router.back()} style={{ padding: 6 }} accessibilityLabel="뒤로 가기" accessibilityRole="button">
             <Ionicons name="arrow-back" size={24} color={isDark ? '#fff' : '#000'} />
           </Pressable>
-          <Text style={[styles.headerTitle, { color: isDark ? '#fff' : '#000' }]}>
+          <Text style={[styles.headerTitle, { color: isDark ? '#fff' : '#000' }]} accessibilityRole="header">
             캘린더
           </Text>
           <View style={{ width: 36 }} />
@@ -99,11 +99,11 @@ export default function CalendarScreen() {
 
         {/* Month navigation */}
         <View style={styles.monthNav}>
-          <Pressable onPress={prevMonth}><Ionicons name="chevron-back" size={24} color={isDark ? '#ccc' : '#555'} /></Pressable>
-          <Text style={[styles.monthText, { color: isDark ? '#fff' : '#000' }]}>
+          <Pressable onPress={prevMonth} accessibilityLabel="이전 달" accessibilityRole="button"><Ionicons name="chevron-back" size={24} color={isDark ? '#ccc' : '#555'} /></Pressable>
+          <Text style={[styles.monthText, { color: isDark ? '#fff' : '#000' }]} accessibilityLabel={`${year}년 ${month}월`}>
             {year}년 {month}월
           </Text>
-          <Pressable onPress={nextMonth}><Ionicons name="chevron-forward" size={24} color={isDark ? '#ccc' : '#555'} /></Pressable>
+          <Pressable onPress={nextMonth} accessibilityLabel="다음 달" accessibilityRole="button"><Ionicons name="chevron-forward" size={24} color={isDark ? '#ccc' : '#555'} /></Pressable>
         </View>
 
         {/* Weekday headers */}

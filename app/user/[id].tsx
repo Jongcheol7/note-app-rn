@@ -105,13 +105,13 @@ export default function UserProfileScreen() {
       <SafeAreaView style={{ flex: 1, backgroundColor: isDark ? '#000' : '#fff' }} edges={['top']}>
         {/* Header */}
         <View style={[styles.header, { borderBottomColor: isDark ? '#333' : '#eee' }]}>
-          <Pressable onPress={() => router.back()} style={{ padding: 6 }}>
+          <Pressable onPress={() => router.back()} style={{ padding: 6 }} accessibilityLabel="뒤로 가기" accessibilityRole="button">
             <Ionicons name="arrow-back" size={24} color={isDark ? '#fff' : '#000'} />
           </Pressable>
-          <Text style={[styles.headerTitle, { color: isDark ? '#fff' : '#000' }]}>
+          <Text style={[styles.headerTitle, { color: isDark ? '#fff' : '#000' }]} accessibilityRole="header">
             프로필
           </Text>
-          <Pressable onPress={handleReport} style={{ padding: 6 }}>
+          <Pressable onPress={handleReport} style={{ padding: 6 }} accessibilityLabel="사용자 신고" accessibilityRole="button">
             <Ionicons name="flag-outline" size={22} color={isDark ? '#ccc' : '#555'} />
           </Pressable>
         </View>
@@ -146,11 +146,13 @@ export default function UserProfileScreen() {
                     router.push(`/chat/${[user!.id, id!].sort().join('_')}` as any)
                   }
                   style={styles.actionBtn}
+                  accessibilityLabel="메시지 보내기"
+                  accessibilityRole="button"
                 >
                   <Ionicons name="chatbubble-outline" size={18} color="#3b82f6" />
                   <Text style={styles.actionText}>메시지</Text>
                 </Pressable>
-                <Pressable onPress={handleBlock} style={styles.actionBtn}>
+                <Pressable onPress={handleBlock} style={styles.actionBtn} accessibilityLabel={blocked ? '차단 해제' : '사용자 차단'} accessibilityRole="button">
                   <Ionicons
                     name={blocked ? 'person-add-outline' : 'ban-outline'}
                     size={18}
@@ -167,6 +169,8 @@ export default function UserProfileScreen() {
             <Pressable
               onPress={() => router.push(`/notes/${item.noteNo}` as any)}
               style={[styles.noteItem, { borderBottomColor: isDark ? '#333' : '#f0f0f0' }]}
+              accessibilityLabel={`노트: ${item.title || '제목 없음'}`}
+              accessibilityRole="button"
             >
               <Text
                 style={[styles.noteTitle, { color: isDark ? '#fff' : '#000' }]}

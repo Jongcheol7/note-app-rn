@@ -67,10 +67,10 @@ export default function TrashList() {
           </Text>
         </View>
         <View style={styles.trashActions}>
-          <Pressable onPress={() => handleRecover(item.noteNo)} style={styles.actionBtn}>
+          <Pressable onPress={() => handleRecover(item.noteNo)} style={styles.actionBtn} accessibilityLabel="노트 복원" accessibilityRole="button">
             <Ionicons name="refresh-outline" size={20} color="#3b82f6" />
           </Pressable>
-          <Pressable onPress={() => handleHardDelete(item.noteNo)} style={styles.actionBtn}>
+          <Pressable onPress={() => handleHardDelete(item.noteNo)} style={styles.actionBtn} accessibilityLabel="영구 삭제" accessibilityRole="button">
             <Ionicons name="trash-outline" size={20} color="#ef4444" />
           </Pressable>
         </View>
@@ -96,10 +96,10 @@ export default function TrashList() {
           { backgroundColor: isDark ? '#000' : '#fff', borderBottomColor: isDark ? '#333' : '#eee' },
         ]}
       >
-        <Pressable onPress={() => router.back()} style={{ padding: 6 }}>
+        <Pressable onPress={() => router.back()} style={{ padding: 6 }} accessibilityLabel="뒤로 가기" accessibilityRole="button">
           <Ionicons name="arrow-back" size={24} color={isDark ? '#fff' : '#000'} />
         </Pressable>
-        <Text style={[styles.headerTitle, { color: isDark ? '#fff' : '#000' }]}>
+        <Text style={[styles.headerTitle, { color: isDark ? '#fff' : '#000' }]} accessibilityRole="header">
           휴지통
         </Text>
         <View style={{ width: 36 }} />

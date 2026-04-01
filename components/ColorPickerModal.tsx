@@ -60,6 +60,9 @@ export default function ColorPickerModal({
                   { backgroundColor: color },
                   currentColor === color && styles.swatchActive,
                 ]}
+                accessibilityLabel={`배경색 ${color}`}
+                accessibilityRole="button"
+                accessibilityState={{ selected: currentColor === color }}
               >
                 {currentColor === color && (
                   <Ionicons name="checkmark" size={18} color="#000" />

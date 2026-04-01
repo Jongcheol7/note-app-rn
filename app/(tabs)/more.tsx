@@ -37,6 +37,8 @@ export default function MoreScreen() {
               if (item.route) router.push(item.route as any);
               if (item.action) item.action();
             }}
+            accessibilityLabel={item.label}
+            accessibilityRole="button"
             style={{
               flexDirection: 'row',
               alignItems: 'center',
@@ -53,6 +55,8 @@ export default function MoreScreen() {
         ))}
         <Pressable
           onPress={user ? signOut : () => {}}
+          accessibilityLabel={user ? '로그아웃' : '로그인'}
+          accessibilityRole="button"
           style={{
             flexDirection: 'row',
             alignItems: 'center',

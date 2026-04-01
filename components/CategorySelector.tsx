@@ -34,6 +34,9 @@ export default function CategorySelector() {
           <Pressable
             key={cat.categoryNo}
             onPress={() => setSelectedCategoryNo(cat.categoryNo)}
+            accessibilityLabel={`카테고리: ${cat.name}`}
+            accessibilityRole="button"
+            accessibilityState={{ selected: isActive }}
             style={[
               styles.chip,
               isActive

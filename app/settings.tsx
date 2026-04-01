@@ -98,7 +98,7 @@ export default function SettingsScreen() {
     onPress: () => void;
     color?: string;
   }) => (
-    <Pressable onPress={onPress} style={[styles.menuItem, { borderBottomColor: isDark ? '#333' : '#f0f0f0' }]}>
+    <Pressable onPress={onPress} style={[styles.menuItem, { borderBottomColor: isDark ? '#333' : '#f0f0f0' }]} accessibilityLabel={label} accessibilityRole="button">
       <Ionicons name={icon as any} size={20} color={color || (isDark ? '#ccc' : '#555')} />
       <Text style={[styles.menuLabel, { color: color || (isDark ? '#fff' : '#000') }]}>{label}</Text>
       <Ionicons name="chevron-forward" size={18} color="#999" />
@@ -109,10 +109,10 @@ export default function SettingsScreen() {
     <AuthGuard showLogin>
       <SafeAreaView style={{ flex: 1, backgroundColor: isDark ? '#000' : '#fff' }} edges={['top']}>
         <View style={[styles.header, { borderBottomColor: isDark ? '#333' : '#eee' }]}>
-          <Pressable onPress={() => router.back()} style={{ padding: 6 }}>
+          <Pressable onPress={() => router.back()} style={{ padding: 6 }} accessibilityLabel="뒤로 가기" accessibilityRole="button">
             <Ionicons name="arrow-back" size={24} color={isDark ? '#fff' : '#000'} />
           </Pressable>
-          <Text style={[styles.headerTitle, { color: isDark ? '#fff' : '#000' }]}>설정</Text>
+          <Text style={[styles.headerTitle, { color: isDark ? '#fff' : '#000' }]} accessibilityRole="header">설정</Text>
           <View style={{ width: 36 }} />
         </View>
 
@@ -128,6 +128,9 @@ export default function SettingsScreen() {
                   key={String(mode)}
                   onPress={() => handleThemeChange(mode)}
                   style={[styles.themeBtn, isActive && styles.themeBtnActive]}
+                  accessibilityLabel={`${label} 테마`}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: isActive }}
                 >
                   <Text style={[styles.themeBtnText, isActive && styles.themeBtnTextActive]}>
                     {label}

@@ -114,14 +114,14 @@ export default function Header() {
               autoFocus
             />
             {searchText.length > 0 && (
-              <Pressable onPress={() => handleSearch('')}>
+              <Pressable onPress={() => handleSearch('')} accessibilityLabel="검색어 지우기" accessibilityRole="button">
                 <View style={[styles.clearBtn, { backgroundColor: colors.textTertiary }]}>
                   <Ionicons name="close" size={12} color={colors.background} />
                 </View>
               </Pressable>
             )}
           </View>
-          <Pressable onPress={closeSearch} style={styles.cancelBtn}>
+          <Pressable onPress={closeSearch} style={styles.cancelBtn} accessibilityLabel="검색 취소" accessibilityRole="button">
             <Text style={[styles.cancelText, { color: colors.primary }]}>취소</Text>
           </Pressable>
         </Animated.View>
@@ -142,10 +142,10 @@ export default function Header() {
           </Animated.View>
 
           <Animated.View style={[styles.rightSection, { opacity: titleAnim }]}>
-            <Pressable onPress={() => setShowSearch(true)} style={styles.iconBtn}>
+            <Pressable onPress={() => setShowSearch(true)} style={styles.iconBtn} accessibilityLabel="검색" accessibilityRole="button">
               <Ionicons name="search-outline" size={22} color={colors.textSecondary} />
             </Pressable>
-            <Pressable onPress={() => router.push('/profile' as any)} style={styles.iconBtn}>
+            <Pressable onPress={() => router.push('/profile' as any)} style={styles.iconBtn} accessibilityLabel="프로필" accessibilityRole="button">
               {avatarUrl ? (
                 <Image source={{ uri: avatarUrl }} style={styles.profileImg} />
               ) : (

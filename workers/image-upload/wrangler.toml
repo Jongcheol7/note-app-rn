@@ -1,0 +1,19 @@
+name = "notie-image-upload"
+main = "index.ts"
+compatibility_date = "2024-12-01"
+
+# R2 버킷 바인딩
+[[r2_buckets]]
+binding = "IMAGES_BUCKET"
+bucket_name = "notie-images"
+
+# 환경 변수 (비밀값은 `wrangler secret put API_KEY`로 설정)
+[vars]
+ALLOWED_ORIGIN = "*"
+
+# 배포 방법:
+# 1. `npm install -g wrangler`
+# 2. `wrangler login`
+# 3. Cloudflare Dashboard에서 R2 버킷 "notie-images" 생성
+# 4. `wrangler secret put API_KEY` (API 키 설정)
+# 5. `cd workers/image-upload && wrangler deploy`

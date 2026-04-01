@@ -303,24 +303,24 @@
 | 1 | 디자인 토큰 시스템 (ThemeProvider + 시맨틱 컬러) | P0 | ⏳ 디자인팀 |
 | 2 | ~~HTML 새니타이즈 (DOMPurify)~~ | P0 | ✅ 완료 |
 | 3 | ~~인증 토큰 SecureStore 이전~~ | P0 | ✅ 완료 |
-| 4 | 알람 모달 DateTimePicker 교체 | P0 | ⏳ |
-| 5 | 접근성 라벨 전체 추가 | P0 | ⏳ |
+| 4 | ~~알람 모달 DateTimePicker 교체~~ | P0 | ✅ 4/1 완료 |
+| 5 | ~~접근성 라벨 전체 추가~~ | P0 | ✅ 4/1 완료 |
 | 6 | 앱 아이콘 + 스토어 에셋 | P0 | ⏳ PM팀 |
 | 7 | ~~EAS 빌드 설정~~ + 앱 서명 | P0 | ✅/⏳ |
-| 8 | 크래시 리포팅 (Sentry) | P0 | ⏳ |
+| 8 | ~~크래시 리포팅 (Sentry)~~ | P0 | ✅ 4/1 완료 |
 | 9 | 스켈레톤 로딩 | P1 | ⏳ 디자인팀 |
 | 10 | 푸시 알림 (expo-notifications) | P1 | ⏳ |
 
 ---
 
-## 8. 개발팀 분석 항목 처리 현황 (3/31 업데이트)
+## 8. 개발팀 분석 항목 처리 현황 (4/1 업데이트)
 
-### 보안 (4/5 완료)
+### 보안 (5/5 완료)
 - [x] HTML 새니타이즈 (sanitize.ts + noteService 적용)
 - [x] SecureStore 인증 토큰 이전
 - [x] 메시지 수정 RLS (senderId 체크)
 - [x] 양방향 차단 필터
-- [ ] 크래시 리포팅 (Sentry) — 별도 설치 필요
+- [x] 크래시 리포팅 (Sentry) — ✅ 4/1 설치 + 설정 완료
 
 ### 성능 (4/5 완료)
 - [x] NoteCard React.memo + Note 타입
@@ -343,15 +343,15 @@
 - [x] auto-purge 분리 (purgeOldTrashNotes)
 - [x] schema.sql deprecated 표기
 
-### 출시준비 (4/6 완료)
+### 출시준비 (5/6 완료)
 - [x] app.json 완성 (패키지명, 권한, 버전코드)
 - [x] eas.json 생성
 - [x] 개인정보처리방침 + 이용약관 실제 내용
 - [x] 테스트 기반 (jest.config + 2개 테스트)
-- [ ] 접근성 라벨 — 디자인팀과 함께 진행
+- [x] 접근성 라벨 — ✅ 4/1 전체 추가 (15개 화면, 50+ 요소)
 - [ ] 앱 서명 키 생성 — EAS Build 시 자동 생성
 
-### 총계: **22/26 항목 완료 (85%)**
+### 총계: **24/26 항목 완료 (92%)**
 
 ---
 
@@ -382,7 +382,7 @@
 
 ---
 
-## 10. PM팀 분석 항목 처리 현황 (3/31 업데이트)
+## 10. PM팀 분석 항목 처리 현황 (4/1 업데이트)
 
 ### P0 항목 (10/10 완료)
 - [x] Android 패키지명 + EAS 설정 → 개발팀 완료
@@ -391,13 +391,13 @@
 - [x] 채팅 중복 폴링 제거 → 개발팀 완료
 - [x] 카테고리 선택기 → 개발팀 완료
 - [x] 테마 설정 영속화 → ✅ AsyncStorage에 저장/복원
-- [ ] 크래시 리포팅 → Sentry 계정 필요 (외부 작업)
+- [x] 크래시 리포팅 → ✅ 4/1 Sentry 설치 + 설정 (DSN 입력만 남음)
 - [ ] 앱 아이콘 + 스토어 에셋 → 디자인 외부 작업
 - [x] 새 노트 미저장 경고 → ✅ isDirty + 이미지 삽입 시 dirty 마킹
 - [x] 휴지통 purge 분리 → 개발팀 완료
 
-### 코드 작업: **8/8 완료 (100%)**
-### 외부 작업: **2개 남음** (Sentry 계정, 스토어 에셋)
+### 코드 작업: **9/9 완료 (100%)**
+### 외부 작업: **1개 남음** (스토어 에셋)
 
 ---
 
@@ -467,16 +467,150 @@
 | `app/notes/[no].tsx` | 웹 툴바 분기, 저장 토스트, 제목 스타일 개선 |
 | `app/notes/write.tsx` | 웹 툴바 분기 |
 
-### 미해결 이슈 (다음 작업)
+### ~~미해결 이슈~~ → 4/1 전체 해결
 
-| # | 이슈 | 우선순위 | 비고 |
+| # | 이슈 | 우선순위 | 상태 |
 |---|------|----------|------|
-| 1 | 이미지 업로드 R2 연동 | P0 | Supabase Edge Function 또는 Cloudflare Worker 필요 |
-| 2 | 웹 에디터 서식 보존 | P1 | contentEditable 기본 기능만, TipTap 웹 직접 통합 검토 |
-| 3 | 웹 전반 반응형 폴리시 | P1 | 모바일 웹 뷰포트 대응 필요 |
-| 4 | 알람 모달 DateTimePicker 교체 | P0 | 회의 즉시 착수 항목 |
-| 5 | 접근성 라벨 전체 추가 | P0 | 디자인팀 협업 |
-| 6 | 크래시 리포팅 (Sentry) | P0 | 계정 필요 |
+| 1 | ~~이미지 업로드 R2 연동~~ | P0 | ✅ Cloudflare Worker + imageService R2 지원 (Supabase 폴백 유지) |
+| 2 | ~~웹 에디터 서식 보존~~ | P1 | ✅ WebToolbar 네이티브 수준 구현 (H1-H3, 컬러/하이라이트, 코드블록, 인용, 링크, 체크박스) |
+| 3 | ~~웹 전반 반응형 폴리시~~ | P1 | ✅ 노트 상세/작성 max-width 800px 적용 |
+| 4 | ~~알람 모달 DateTimePicker 교체~~ | P0 | ✅ 네이티브 DateTimePicker + 웹 datetime-local input |
+| 5 | ~~접근성 라벨 전체 추가~~ | P0 | ✅ 15개 화면/컴포넌트 50+ 요소에 accessibilityLabel/Role 추가 |
+| 6 | ~~크래시 리포팅 (Sentry)~~ | P0 | ✅ @sentry/react-native 설치 + 설정 (DSN 입력 필요) |
+
+---
+
+## 12. 4/1 작업 내역
+
+### 이미지 업로드 R2 연동
+- [x] Cloudflare Worker 생성 (`workers/image-upload/index.ts` + `wrangler.toml`)
+  - PUT(업로드), DELETE(삭제), GET(서빙) 엔드포인트
+  - API Key 인증, CORS, 캐시 헤더
+- [x] `imageService.ts` R2 지원 추가 (R2 Worker URL 있으면 R2, 없으면 Supabase 폴백)
+- [x] `.env`에 `EXPO_PUBLIC_R2_WORKER_URL`, `EXPO_PUBLIC_R2_API_KEY` 추가
+
+### 웹 에디터 풀 기능 구현
+- [x] `WebToolbar.tsx` 전면 리라이트 — 네이티브 NoteToolbar와 동일한 기능:
+  - Row 1: 실행취소/다시실행, B/I/U/S, 형광펜(6색)/글자색(9색) 피커, 이미지
+  - Row 2 (확장): H1/H2/H3, 글머리/번호 목록, 체크박스, 코드블록, 인용, 수평선, 링크
+  - 컬러 피커 모달 + 링크 URL 입력 모달
+  - 활성 상태 표시 (`queryCommandState`)
+- [x] `NoteEditor.web.tsx` CSS 강화 — 코드블록(`pre`/`code`), 인용(`blockquote`), 수평선, 체크박스, 다크모드 대응
+
+### 웹 반응형
+- [x] `app/notes/[no].tsx` — 노트 상세 콘텐츠 `max-width: 800px` 중앙 정렬
+- [x] `app/notes/write.tsx` — 노트 작성 콘텐츠 `max-width: 800px` 중앙 정렬
+
+### 알람 모달 DateTimePicker 교체
+- [x] `AlarmModal.tsx` 전면 리라이트:
+  - 웹: `<input type="datetime-local">` (네이티브 브라우저 피커)
+  - iOS: `DateTimePicker` spinner 모드 (인라인)
+  - Android: 날짜 → 시간 순차 선택 (네이티브 다이얼로그)
+  - 선택된 시간 미리보기 UI
+- [x] `@react-native-community/datetimepicker` 설치
+
+### 접근성 라벨 전체 추가 (15개 파일, 50+ 요소)
+- [x] `NoteDetailHeader.tsx` — 뒤로가기, 저장, 메뉴, 공개전환, 알람, 배경색, 삭제
+- [x] `CommentSection.tsx` — 댓글 삭제, 댓글 전송, 댓글 입력
+- [x] `Header.tsx` — 검색, 프로필, 검색 취소, 검색어 지우기
+- [x] `LoginScreen.tsx` — Google 로그인 버튼
+- [x] `WebToolbar.tsx` — 모든 툴바 버튼 + 모달 버튼
+- [x] `AlarmModal.tsx` — 날짜 선택, 알람 해제/설정 확인
+- [x] `ColorPickerModal.tsx` — 색상 스와치 (selected 상태 포함)
+- [x] `CategorySelector.tsx` — 카테고리 칩 (selected 상태 포함)
+- [x] `TrashList.tsx` — 뒤로가기, 복원, 영구삭제
+- [x] `app/calendar.tsx` — 뒤로가기, 이전/다음 달
+- [x] `app/category.tsx` — 뒤로가기, 추가, 위/아래 이동, 삭제
+- [x] `app/chat/[convNo].tsx` — 뒤로가기, 메시지 입력, 전송
+- [x] `app/profile.tsx` — 뒤로가기, 설정, 아바타, 닉네임/소개 수정/저장, 플랜 변경
+- [x] `app/settings.tsx` — 뒤로가기, 테마 선택, 메뉴 항목
+- [x] `app/user/[id].tsx` — 뒤로가기, 신고, 메시지, 차단, 노트 항목
+- [x] `app/(tabs)/more.tsx` — 메뉴 항목, 로그아웃
+
+### 크래시 리포팅 Sentry 설정
+- [x] `@sentry/react-native` 설치
+- [x] `app/_layout.tsx` — `Sentry.init()` + `Sentry.wrap(RootLayout)` 적용
+- [x] `app.json` — `@sentry/react-native/expo` 플러그인 추가
+- [x] `.env`에 `EXPO_PUBLIC_SENTRY_DSN` 추가
+
+### 파일 변경 목록 (4/1)
+
+| 파일 | 변경 내용 |
+|------|-----------|
+| `workers/image-upload/index.ts` | **신규** — R2 이미지 업로드 Worker |
+| `workers/image-upload/wrangler.toml` | **신규** — Worker 배포 설정 |
+| `lib/services/imageService.ts` | R2 업로드/삭제 + Supabase 폴백 |
+| `modules/notes/WebToolbar.tsx` | 전면 리라이트 — 네이티브 수준 기능 |
+| `modules/notes/NoteEditor.web.tsx` | CSS 강화 (코드블록, 다크모드 등) |
+| `components/AlarmModal.tsx` | 전면 리라이트 — DateTimePicker 교체 |
+| `app/notes/[no].tsx` | 웹 max-width 적용 |
+| `app/notes/write.tsx` | 웹 max-width 적용 |
+| `app/_layout.tsx` | Sentry 초기화 + wrap |
+| `app.json` | Sentry 플러그인 추가 |
+| `package.json` | datetimepicker, sentry 추가 |
+| `.env` | R2 + Sentry 환경 변수 추가 |
+| `modules/notes/NoteDetailHeader.tsx` | 접근성 라벨 추가 |
+| `modules/notes/CommentSection.tsx` | 접근성 라벨 추가 |
+| `modules/common/Header.tsx` | 접근성 라벨 추가 |
+| `modules/common/LoginScreen.tsx` | 접근성 라벨 추가 |
+| `modules/notes/TrashList.tsx` | 접근성 라벨 추가 |
+| `components/ColorPickerModal.tsx` | 접근성 라벨 추가 |
+| `components/CategorySelector.tsx` | 접근성 라벨 추가 |
+| `app/calendar.tsx` | 접근성 라벨 추가 |
+| `app/category.tsx` | 접근성 라벨 추가 |
+| `app/chat/[convNo].tsx` | 접근성 라벨 추가 |
+| `app/profile.tsx` | 접근성 라벨 추가 |
+| `app/settings.tsx` | 접근성 라벨 추가 |
+| `app/user/[id].tsx` | 접근성 라벨 추가 |
+| `app/(tabs)/more.tsx` | 접근성 라벨 추가 |
+| `docs/team-meeting-2026-03-31.md` | 현황 업데이트 |
+
+---
+
+## 13. 남은 작업 & 다음 단계 (4/1 기준)
+
+### 외부 작업 (계정/설정 필요)
+| # | 작업 | 담당 | 비고 |
+|---|------|------|------|
+| 1 | Sentry DSN 입력 | 개발 | sentry.io 계정 생성 → 프로젝트 생성 → DSN 복사 → .env |
+| 2 | R2 버킷 + Worker 배포 | 개발 | Cloudflare 계정 → R2 버킷 생성 → wrangler deploy |
+| 3 | 앱 아이콘 + 스토어 에셋 | PM/디자인 | 아이콘, 스크린샷, 배너 |
+| 4 | 앱 서명 키 | 개발 | EAS Build 시 자동 생성 |
+
+### P1 개발 작업 (출시 후 1개월)
+| # | 작업 | 우선순위 |
+|---|------|----------|
+| 1 | 푸시 알림 (expo-notifications) | P1 |
+| 2 | 온보딩 플로우 (3화면) | P1 |
+| 3 | 자동 저장 (3초 디바운스) | P1 |
+| 4 | Apple Sign-In | P1 |
+| 5 | 커뮤니티 좋아요 버튼 상세에 추가 | P1 |
+| 6 | E2E 테스트 (Maestro) | P1 |
+| 7 | 노트 카드 스와이프 제스처 | P1 |
+| 8 | BottomSheet 공통 컴포넌트 (4개 모달 통합) | P1 |
+
+### P2 개발 작업 (3개월)
+| # | 작업 |
+|---|------|
+| 1 | 인앱 결제 (IAP) |
+| 2 | Android 위젯 |
+| 3 | 공유 확장 (share intent) |
+| 4 | PDF/마크다운 내보내기 |
+| 5 | 드래그 정렬, 멀티 선택 |
+| 6 | 검색 고도화, 다국어 (i18n) |
+| 7 | 커스텀 폰트 (Pretendard) |
+
+### 전체 진행률 (4/1 기준)
+
+| 영역 | 완료 | 전체 | 비율 |
+|------|------|------|------|
+| 개발팀 분석 | 24 | 26 | **92%** |
+| 디자인팀 분석 | 13 | 13 | **100%** |
+| PM팀 P0 코드 | 9 | 9 | **100%** |
+| 야간 미해결 이슈 | 6 | 6 | **100%** |
+| **총 코드 작업** | **52** | **54** | **96%** |
+
+> **남은 2개:** 앱 서명 키(EAS Build 시 자동), expo-image 캐싱(npm 호환 확인 후)
 
 ### Supabase DB 작업 완료
 - [x] add-rls.sql 전체 실행 (RLS 정책 + 트리거)

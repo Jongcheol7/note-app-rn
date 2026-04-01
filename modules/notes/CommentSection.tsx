@@ -99,7 +99,7 @@ export default function CommentSection({ noteNo }: CommentSectionProps) {
               </Text>
             </View>
             {isOwn && (
-              <Pressable onPress={() => handleDelete(comment.commentNo)} hitSlop={8}>
+              <Pressable onPress={() => handleDelete(comment.commentNo)} hitSlop={8} accessibilityLabel="댓글 삭제" accessibilityRole="button">
                 <Ionicons name="close" size={16} color="#999" />
               </Pressable>
             )}
@@ -119,6 +119,7 @@ export default function CommentSection({ noteNo }: CommentSectionProps) {
           ]}
           placeholder="댓글 입력..."
           placeholderTextColor="#999"
+          accessibilityLabel="댓글 입력"
           value={text}
           onChangeText={setText}
           onSubmitEditing={handleSend}
@@ -128,6 +129,8 @@ export default function CommentSection({ noteNo }: CommentSectionProps) {
           onPress={handleSend}
           disabled={!text.trim()}
           style={[styles.sendBtn, !text.trim() && { opacity: 0.4 }]}
+          accessibilityLabel="댓글 전송"
+          accessibilityRole="button"
         >
           <Ionicons name="send" size={18} color="#fff" />
         </Pressable>

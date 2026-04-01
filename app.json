@@ -50,6 +50,13 @@
         {
           "photosPermission": "노트에 이미지를 추가하기 위해 사진 접근 권한이 필요합니다."
         }
+      ],
+      [
+        "@sentry/react-native/expo",
+        {
+          "organization": "notie",
+          "project": "note-app-rn"
+        }
       ]
     ],
     "experiments": {

@@ -91,14 +91,14 @@ export default function CategoryScreen() {
         ]}
       >
         <View style={styles.reorderBtns}>
-          <Pressable onPress={() => moveItem(index, 'up')} hitSlop={8}>
+          <Pressable onPress={() => moveItem(index, 'up')} hitSlop={8} accessibilityLabel="위로 이동" accessibilityRole="button">
             <Ionicons
               name="chevron-up"
               size={18}
               color={index === 0 ? '#ccc' : isDark ? '#aaa' : '#555'}
             />
           </Pressable>
-          <Pressable onPress={() => moveItem(index, 'down')} hitSlop={8}>
+          <Pressable onPress={() => moveItem(index, 'down')} hitSlop={8} accessibilityLabel="아래로 이동" accessibilityRole="button">
             <Ionicons
               name="chevron-down"
               size={18}
@@ -120,6 +120,8 @@ export default function CategoryScreen() {
         <Pressable
           onPress={() => handleDelete(item.categoryNo, item.name)}
           hitSlop={8}
+          accessibilityLabel={`${item.name} 카테고리 삭제`}
+          accessibilityRole="button"
         >
           <Ionicons name="trash-outline" size={20} color="#ef4444" />
         </Pressable>
@@ -144,7 +146,7 @@ export default function CategoryScreen() {
             },
           ]}
         >
-          <Pressable onPress={() => router.back()} style={{ padding: 6 }}>
+          <Pressable onPress={() => router.back()} style={{ padding: 6 }} accessibilityLabel="뒤로 가기" accessibilityRole="button">
             <Ionicons
               name="arrow-back"
               size={24}
@@ -153,10 +155,11 @@ export default function CategoryScreen() {
           </Pressable>
           <Text
             style={[styles.headerTitle, { color: isDark ? '#fff' : '#000' }]}
+            accessibilityRole="header"
           >
             카테고리
           </Text>
-          <Pressable onPress={() => setShowAddModal(true)} style={{ padding: 6 }}>
+          <Pressable onPress={() => setShowAddModal(true)} style={{ padding: 6 }} accessibilityLabel="카테고리 추가" accessibilityRole="button">
             <Ionicons name="add" size={26} color="#3b82f6" />
           </Pressable>
         </View>
@@ -252,6 +255,8 @@ export default function CategoryScreen() {
                   styles.addBtn,
                   createCategory.isPending && { opacity: 0.5 },
                 ]}
+                accessibilityLabel="카테고리 추가 확인"
+                accessibilityRole="button"
               >
                 <Text style={styles.addBtnText}>추가</Text>
               </Pressable>

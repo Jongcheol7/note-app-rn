@@ -82,7 +82,7 @@ export default function NoteDetailHeader({
         },
       ]}
     >
-      <Pressable onPress={handleBack} style={styles.iconBtn}>
+      <Pressable onPress={handleBack} style={styles.iconBtn} accessibilityLabel="뒤로 가기" accessibilityRole="button">
         <Ionicons name="arrow-back" size={24} color={isDark ? '#fff' : '#000'} />
       </Pressable>
 
@@ -91,6 +91,8 @@ export default function NoteDetailHeader({
           onPress={onSave}
           disabled={isSaving}
           style={[styles.saveBtn, isSaving && { opacity: 0.5 }]}
+          accessibilityLabel={isSaving ? '저장 중' : '노트 저장'}
+          accessibilityRole="button"
         >
           <Text style={styles.saveBtnText}>
             {isSaving ? '저장 중...' : '저장'}
@@ -98,7 +100,7 @@ export default function NoteDetailHeader({
         </Pressable>
 
         {!isNew && (
-          <Pressable onPress={() => setShowMenu(true)} style={styles.iconBtn}>
+          <Pressable onPress={() => setShowMenu(true)} style={styles.iconBtn} accessibilityLabel="더보기 메뉴" accessibilityRole="button">
             <Ionicons
               name="ellipsis-vertical"
               size={22}
@@ -131,6 +133,8 @@ export default function NoteDetailHeader({
                 onTogglePublic?.();
               }}
               style={styles.menuItem}
+              accessibilityLabel={isPublic ? '비공개로 전환' : '공개로 전환'}
+              accessibilityRole="button"
             >
               <Ionicons
                 name={isPublic ? 'lock-closed-outline' : 'globe-outline'}
@@ -148,6 +152,8 @@ export default function NoteDetailHeader({
                 onSetAlarm?.();
               }}
               style={styles.menuItem}
+              accessibilityLabel="알람 설정"
+              accessibilityRole="button"
             >
               <Ionicons name="alarm-outline" size={20} color={isDark ? '#ccc' : '#555'} />
               <Text style={[styles.menuText, isDark && { color: '#fff' }]}>
@@ -161,6 +167,8 @@ export default function NoteDetailHeader({
                 onToggleColor?.();
               }}
               style={styles.menuItem}
+              accessibilityLabel="배경색 변경"
+              accessibilityRole="button"
             >
               <Ionicons name="color-palette-outline" size={20} color={isDark ? '#ccc' : '#555'} />
               <Text style={[styles.menuText, isDark && { color: '#fff' }]}>
@@ -169,6 +177,8 @@ export default function NoteDetailHeader({
             </Pressable>
 
             <Pressable
+              accessibilityLabel="노트 삭제"
+              accessibilityRole="button"
               onPress={() => {
                 setShowMenu(false);
                 Alert.alert('삭제', '이 노트를 삭제하시겠습니까?', [

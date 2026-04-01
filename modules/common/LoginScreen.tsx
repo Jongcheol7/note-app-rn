@@ -48,6 +48,8 @@ export default function LoginScreen() {
               opacity: pressed ? 0.8 : 1,
             },
           ]}
+          accessibilityLabel="Google로 로그인"
+          accessibilityRole="button"
         >
           <Ionicons
             name="logo-google"

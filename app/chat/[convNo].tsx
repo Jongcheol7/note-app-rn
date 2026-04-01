@@ -121,10 +121,10 @@ export default function ChatRoomScreen() {
       <SafeAreaView style={{ flex: 1, backgroundColor: isDark ? '#000' : '#fff' }}>
         {/* Header */}
         <View style={[styles.header, { borderBottomColor: isDark ? '#333' : '#eee' }]}>
-          <Pressable onPress={() => router.back()} style={{ padding: 6 }}>
+          <Pressable onPress={() => router.back()} style={{ padding: 6 }} accessibilityLabel="뒤로 가기" accessibilityRole="button">
             <Ionicons name="arrow-back" size={24} color={isDark ? '#fff' : '#000'} />
           </Pressable>
-          <Text style={[styles.headerTitle, { color: isDark ? '#fff' : '#000' }]}>채팅</Text>
+          <Text style={[styles.headerTitle, { color: isDark ? '#fff' : '#000' }]} accessibilityRole="header">채팅</Text>
           <View style={{ width: 36 }} />
         </View>
 
@@ -181,6 +181,7 @@ export default function ChatRoomScreen() {
               style={[styles.input, { color: isDark ? '#fff' : '#000', backgroundColor: isDark ? '#333' : '#f3f4f6' }]}
               placeholder="메시지 입력..."
               placeholderTextColor="#999"
+              accessibilityLabel="메시지 입력"
               value={text}
               onChangeText={setText}
               onSubmitEditing={handleSend}
@@ -190,6 +191,8 @@ export default function ChatRoomScreen() {
               onPress={handleSend}
               disabled={!text.trim()}
               style={[styles.sendBtn, !text.trim() && { opacity: 0.4 }]}
+              accessibilityLabel="메시지 전송"
+              accessibilityRole="button"
             >
               <Ionicons name="send" size={20} color="#fff" />
             </Pressable>

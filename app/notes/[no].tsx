@@ -177,6 +177,7 @@ export default function NoteDetailScreen() {
   }
 
   const bgColor = store.selectedColor || (isDark ? '#000' : '#fff');
+  const isWeb = Platform.OS === 'web';
 
   return (
     <AuthGuard showLogin>
@@ -200,7 +201,11 @@ export default function NoteDetailScreen() {
           />
         )}
 
-        <ScrollView style={styles.content} keyboardDismissMode="interactive">
+        <ScrollView
+          style={styles.content}
+          keyboardDismissMode="interactive"
+          contentContainerStyle={isWeb ? styles.webContent : undefined}
+        >
           {editable ? (
             <TextInput
               style={[styles.titleInput, { color: isDark ? '#fff' : '#000' }]}
@@ -275,6 +280,11 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
   },
+  webContent: {
+    maxWidth: 800,
+    width: '100%',
+    alignSelf: 'center',
+  } as any,
   titleInput: {
     fontSize: 24,
     fontWeight: '700',

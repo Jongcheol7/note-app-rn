@@ -124,18 +124,18 @@ export default function ProfileScreen() {
       <SafeAreaView style={{ flex: 1, backgroundColor: isDark ? '#000' : '#fff' }} edges={['top']}>
         {/* Header */}
         <View style={[styles.header, { borderBottomColor: isDark ? '#333' : '#eee' }]}>
-          <Pressable onPress={() => router.back()} style={{ padding: 6 }}>
+          <Pressable onPress={() => router.back()} style={{ padding: 6 }} accessibilityLabel="뒤로 가기" accessibilityRole="button">
             <Ionicons name="arrow-back" size={24} color={isDark ? '#fff' : '#000'} />
           </Pressable>
-          <Text style={[styles.headerTitle, { color: isDark ? '#fff' : '#000' }]}>프로필</Text>
-          <Pressable onPress={() => router.push('/settings' as any)} style={{ padding: 6 }}>
+          <Text style={[styles.headerTitle, { color: isDark ? '#fff' : '#000' }]} accessibilityRole="header">프로필</Text>
+          <Pressable onPress={() => router.push('/settings' as any)} style={{ padding: 6 }} accessibilityLabel="설정" accessibilityRole="button">
             <Ionicons name="settings-outline" size={22} color={isDark ? '#ccc' : '#555'} />
           </Pressable>
         </View>
 
         <ScrollView contentContainerStyle={styles.content}>
           {/* Avatar */}
-          <Pressable onPress={handleAvatarChange} style={styles.avatarSection}>
+          <Pressable onPress={handleAvatarChange} style={styles.avatarSection} accessibilityLabel="프로필 사진 변경" accessibilityRole="button">
             {avatarUrl ? (
               <Image source={{ uri: avatarUrl }} style={styles.avatar} />
             ) : (
@@ -159,12 +159,12 @@ export default function ProfileScreen() {
                   autoFocus
                   maxLength={20}
                 />
-                <Pressable onPress={handleSaveNickname}>
+                <Pressable onPress={handleSaveNickname} accessibilityLabel="닉네임 저장" accessibilityRole="button">
                   <Ionicons name="checkmark" size={22} color="#3b82f6" />
                 </Pressable>
               </View>
             ) : (
-              <Pressable onPress={() => setEditingNickname(true)} style={styles.editRow}>
+              <Pressable onPress={() => setEditingNickname(true)} style={styles.editRow} accessibilityLabel="닉네임 수정" accessibilityRole="button">
                 <Text style={[styles.nickname, { color: isDark ? '#fff' : '#000' }]}>{nickname}</Text>
                 <Ionicons name="pencil-outline" size={16} color="#999" />
               </Pressable>
@@ -183,12 +183,12 @@ export default function ProfileScreen() {
                   maxLength={150}
                   autoFocus
                 />
-                <Pressable onPress={handleSaveBio} style={{ alignSelf: 'flex-end' }}>
+                <Pressable onPress={handleSaveBio} style={{ alignSelf: 'flex-end' }} accessibilityLabel="소개 저장" accessibilityRole="button">
                   <Text style={{ color: '#3b82f6', fontWeight: '600' }}>저장</Text>
                 </Pressable>
               </View>
             ) : (
-              <Pressable onPress={() => setEditingBio(true)}>
+              <Pressable onPress={() => setEditingBio(true)} accessibilityLabel="소개 수정" accessibilityRole="button">
                 <Text style={{ color: isDark ? '#aaa' : '#666', fontSize: 14 }}>
                   {bio || '소개를 입력하세요'}
                 </Text>
@@ -212,7 +212,7 @@ export default function ProfileScreen() {
             <Text style={styles.storageText}>
               {formatBytes(storageUsage)} / {formatBytes(limit)}
             </Text>
-            <Pressable onPress={() => router.push('/plan' as any)} style={styles.planBtn}>
+            <Pressable onPress={() => router.push('/plan' as any)} style={styles.planBtn} accessibilityLabel="플랜 변경" accessibilityRole="button">
               <Text style={styles.planBtnText}>플랜 변경</Text>
             </Pressable>
           </View>
