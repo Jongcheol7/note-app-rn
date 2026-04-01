@@ -1,6 +1,8 @@
 import { supabase } from '../supabase';
 
-const MAX_HISTORY_PER_NOTE = 50;
+const MAX_HISTORY_PER_NOTE = 20;
+const MERGE_WINDOW_MS = 5 * 60 * 1000; // 5분
+const RETENTION_DAYS = 30;
 
 export interface NoteHistoryItem {
   history_no: number;
@@ -14,6 +16,10 @@ export interface NoteHistoryItem {
 
 /**
  * 현재 노트 내용을 히스토리에 저장 (저장 전에 호출)
+ *
+ * - 5분 이내 재저장이면 마지막 히스토리를 업데이트 (중간 버전 병합)
+ * - 노트당 최대 20개 유지
+ * - 30일 초과 히스토리 자동 삭제
  */
 export async function saveNoteHistory(
   noteNo: number,
@@ -27,6 +33,29 @@ export async function saveNoteHistory(
   // 빈 내용이면 히스토리 저장하지 않음
   if (!title?.trim() && !plainText?.trim()) return;
 
+  // 가장 최근 히스토리 확인 — 5분 이내면 병합(업데이트)
+  const { data: latest } = await supabase
+    .from('note_history')
+    .select('history_no, saved_at')
+    .eq('note_no', noteNo)
+    .eq('user_id', userId)
+    .order('saved_at', { ascending: false })
+    .limit(1)
+    .single();
+
+  if (latest) {
+    const elapsed = Date.now() - new Date(latest.saved_at).getTime();
+    if (elapsed < MERGE_WINDOW_MS) {
+      // 5분 이내 → 마지막 히스토리를 현재 내용으로 업데이트
+      await supabase
+        .from('note_history')
+        .update({ title, content, plain_text: plainText, saved_at: new Date().toISOString() })
+        .eq('history_no', latest.history_no);
+      return;
+    }
+  }
+
+  // 새 히스토리 생성
   await supabase.from('note_history').insert({
     note_no: noteNo,
     user_id: userId,
@@ -35,7 +64,16 @@ export async function saveNoteHistory(
     plain_text: plainText,
   });
 
-  // 오래된 히스토리 정리 (MAX 초과분 삭제)
+  // 정리: 30일 초과 삭제
+  const thirtyDaysAgo = new Date(Date.now() - RETENTION_DAYS * 24 * 60 * 60 * 1000).toISOString();
+  await supabase
+    .from('note_history')
+    .delete()
+    .eq('note_no', noteNo)
+    .eq('user_id', userId)
+    .lt('saved_at', thirtyDaysAgo);
+
+  // 정리: 개수 초과 삭제
   const { data: histories } = await supabase
     .from('note_history')
     .select('history_no')
