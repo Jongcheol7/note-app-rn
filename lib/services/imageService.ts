@@ -94,7 +94,7 @@ export async function uploadImage(
   }
 
   const compressed = await compressImage(uri);
-  const fileName = `${userId}/${Date.now()}.jpg`;
+  const fileName = `prod/users/${userId}/notes/${Date.now()}.jpg`;
 
   let fileBody: Blob | ArrayBuffer;
   if (Platform.OS === 'web') {
@@ -136,6 +136,34 @@ export async function uploadImage(
   });
 
   return { url: publicUrl, fileSize };
+}
+
+/** HTML에서 img src URL 추출 */
+function extractImageUrls(html: string): string[] {
+  const matches = html.match(/<img[^>]+src="([^"]+)"/g) || [];
+  return matches.map(m => {
+    const src = m.match(/src="([^"]+)"/);
+    return src ? src[1] : '';
+  }).filter(Boolean);
+}
+
+/** 저장 시 이전 content와 비교하여 삭제된 이미지 정리 */
+export async function cleanupRemovedImages(
+  oldContent: string,
+  newContent: string,
+  userId: string
+) {
+  const oldUrls = extractImageUrls(oldContent);
+  const newUrls = new Set(extractImageUrls(newContent));
+
+  const removed = oldUrls.filter(url => !newUrls.has(url));
+  await Promise.all(removed.map(url => deleteImage(url, userId)));
+}
+
+/** 노트 영구 삭제 시 해당 노트의 이미지 전체 삭제 */
+export async function deleteAllNoteImages(noteContent: string, userId: string) {
+  const urls = extractImageUrls(noteContent);
+  await Promise.all(urls.map(url => deleteImage(url, userId)));
 }
 
 export async function deleteImage(fileUrl: string, userId: string) {

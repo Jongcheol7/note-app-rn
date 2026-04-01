@@ -36,13 +36,29 @@ export default {
       return new Response(null, { status: 204, headers });
     }
 
-    // API Key 인증
+    const url = new URL(request.url);
+
+    // GET은 인증 없이 이미지 서빙
+    if (request.method === 'GET') {
+      const key = url.pathname.slice(1);
+      if (!key) return new Response('Missing key', { status: 400, headers });
+
+      const object = await env.IMAGES_BUCKET.get(key);
+      if (!object) return new Response('Not Found', { status: 404, headers });
+
+      const objectHeaders = new Headers(headers);
+      objectHeaders.set('Content-Type', object.httpMetadata?.contentType || 'image/jpeg');
+      objectHeaders.set('Cache-Control', 'public, max-age=31536000, immutable');
+      objectHeaders.set('ETag', object.httpEtag);
+
+      return new Response(object.body, { headers: objectHeaders });
+    }
+
+    // PUT, DELETE는 API Key 인증 필요
     const authHeader = request.headers.get('Authorization');
     if (!authHeader || authHeader !== `Bearer ${env.API_KEY}`) {
       return unauthorized(env);
     }
-
-    const url = new URL(request.url);
     const key = url.pathname.slice(1); // "userId/timestamp.jpg"
 
     if (!key) {
@@ -70,21 +86,6 @@ export default {
       return new Response(JSON.stringify({ ok: true }), {
         headers: { ...headers, 'Content-Type': 'application/json' },
       });
-    }
-
-    // GET — 이미지 서빙 (R2 public access 대신 Worker에서 서빙할 경우)
-    if (request.method === 'GET') {
-      const object = await env.IMAGES_BUCKET.get(key);
-      if (!object) {
-        return new Response('Not Found', { status: 404, headers });
-      }
-
-      const objectHeaders = new Headers(headers);
-      objectHeaders.set('Content-Type', object.httpMetadata?.contentType || 'image/jpeg');
-      objectHeaders.set('Cache-Control', 'public, max-age=31536000, immutable');
-      objectHeaders.set('ETag', object.httpEtag);
-
-      return new Response(object.body, { headers: objectHeaders });
     }
 
     return new Response('Method Not Allowed', { status: 405, headers });

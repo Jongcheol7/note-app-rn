@@ -176,6 +176,16 @@ export async function saveNote({
           current.content || '',
           current.plainText || ''
         );
+
+        // 이전 content와 비교하여 삭제된 이미지 R2에서 정리
+        if (current.content) {
+          try {
+            const { cleanupRemovedImages } = await import('./imageService');
+            await cleanupRemovedImages(current.content, sanitizedContent, userId);
+          } catch {
+            // 이미지 정리 실패해도 저장은 계속 진행
+          }
+        }
       }
     } catch {
       // 히스토리 저장 실패해도 저장은 계속 진행
@@ -255,6 +265,23 @@ export async function softDeleteNote(noteNo: number, userId: string) {
 // HARD DELETE
 // ==================
 export async function hardDeleteNote(noteNo: number, userId: string) {
+  // 삭제 전 노트 content 가져와서 이미지 정리
+  try {
+    const { data: note } = await supabase
+      .from('note')
+      .select('content')
+      .eq('noteNo', noteNo)
+      .eq('userId', userId)
+      .single();
+
+    if (note?.content) {
+      const { deleteAllNoteImages } = await import('./imageService');
+      await deleteAllNoteImages(note.content, userId);
+    }
+  } catch {
+    // 이미지 정리 실패해도 삭제는 계속 진행
+  }
+
   const { error } = await supabase
     .from('note')
     .delete()

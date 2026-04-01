@@ -26,4 +26,4 @@ CREATE POLICY "note_history_insert" ON note_history
 CREATE POLICY "note_history_delete" ON note_history
   FOR DELETE USING (user_id = auth.uid()::text);
 
--- 노트당 최대 50개 히스토리 유지 (오래된 것 자동 정리는 앱 레벨에서 처리)
+-- 노트당 최대 20개 히스토리 유지 (오래된 것 자동 정리는 앱 레벨에서 처리)
