@@ -1,5 +1,6 @@
 import { supabase } from '../supabase';
 import { sanitizeHtml } from '../utils/sanitize';
+import { saveNoteHistory } from './historyService';
 
 const PAGE_SIZE = 10;
 
@@ -158,6 +159,28 @@ export async function saveNote({
   const trimmedTitle = (title || '').slice(0, 200);
 
   if (noteNo) {
+    // 업데이트 전 현재 내용을 히스토리에 저장
+    try {
+      const { data: current } = await supabase
+        .from('note')
+        .select('title, content, plainText')
+        .eq('noteNo', noteNo)
+        .eq('userId', userId)
+        .single();
+
+      if (current) {
+        await saveNoteHistory(
+          noteNo,
+          userId,
+          current.title || '',
+          current.content || '',
+          current.plainText || ''
+        );
+      }
+    } catch {
+      // 히스토리 저장 실패해도 저장은 계속 진행
+    }
+
     // Update existing
     const { data, error } = await supabase
       .from('note')

@@ -17,12 +17,14 @@ import { useNoteFormStore } from '@/store/useNoteFormStore';
 
 interface Props {
   onSave: () => void;
+  onBack?: () => void;
   isSaving: boolean;
   isNew: boolean;
   onDelete?: () => void;
   onTogglePublic?: () => void;
   onToggleColor?: () => void;
   onSetAlarm?: () => void;
+  onShowHistory?: () => void;
   isPublic?: boolean;
 }
 
@@ -34,41 +36,30 @@ const NOTE_COLORS = [
 
 export default function NoteDetailHeader({
   onSave,
+  onBack,
   isSaving,
   isNew,
   onDelete,
   onTogglePublic,
   onToggleColor,
   onSetAlarm,
+  onShowHistory,
   isPublic,
 }: Props) {
   const router = useRouter();
   const isDark = useColorScheme() === 'dark';
-  const isDirty = useNoteFormStore((s) => s.isDirty);
   const [showMenu, setShowMenu] = useState(false);
 
-  const goBack = () => {
-    if (router.canGoBack()) {
-      router.back();
-    } else {
-      router.replace('/');
-    }
-  };
-
   const handleBack = () => {
-    if (isDirty) {
-      if (Platform.OS === 'web') {
-        if (window.confirm('저장하지 않은 변경사항이 있습니다. 나가시겠습니까?')) {
-          goBack();
-        }
-      } else {
-        Alert.alert('저장하지 않은 변경사항', '저장하지 않고 나가시겠습니까?', [
-          { text: '취소', style: 'cancel' },
-          { text: '나가기', style: 'destructive', onPress: goBack },
-        ]);
-      }
+    if (onBack) {
+      // 자동 저장 모드: 부모가 저장 후 뒤로가기 처리
+      onBack();
     } else {
-      goBack();
+      if (router.canGoBack()) {
+        router.back();
+      } else {
+        router.replace('/');
+      }
     }
   };
 
@@ -175,6 +166,23 @@ export default function NoteDetailHeader({
                 배경색 변경
               </Text>
             </Pressable>
+
+            {onShowHistory && (
+              <Pressable
+                onPress={() => {
+                  setShowMenu(false);
+                  onShowHistory();
+                }}
+                style={styles.menuItem}
+                accessibilityLabel="히스토리"
+                accessibilityRole="button"
+              >
+                <Ionicons name="time-outline" size={20} color={isDark ? '#ccc' : '#555'} />
+                <Text style={[styles.menuText, isDark && { color: '#fff' }]}>
+                  히스토리
+                </Text>
+              </Pressable>
+            )}
 
             <Pressable
               accessibilityLabel="노트 삭제"

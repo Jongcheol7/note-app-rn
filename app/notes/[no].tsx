@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback, useState } from 'react';
+import React, { useEffect, useCallback, useState, useRef } from 'react';
 import {
   View,
   TextInput,
@@ -38,6 +38,9 @@ if (Platform.OS !== 'web') {
 import CommentSection from '@/modules/notes/CommentSection';
 import ColorPickerModal from '@/components/ColorPickerModal';
 import AlarmModal from '@/components/AlarmModal';
+import NoteHistoryModal from '@/modules/notes/NoteHistoryModal';
+
+const AUTO_SAVE_DELAY = 3000;
 
 export default function NoteDetailScreen() {
   const { no } = useLocalSearchParams<{ no: string }>();
@@ -58,7 +61,10 @@ export default function NoteDetailScreen() {
 
   const [showColorPicker, setShowColorPicker] = useState(false);
   const [showAlarmModal, setShowAlarmModal] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
   const [saveToast, setSaveToast] = useState(false);
+  const autoSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isSavingRef = useRef(false);
 
   const isCommunity = menuFrom === 'community';
   const isOwner = note?.userId === user?.id;
@@ -87,28 +93,24 @@ export default function NoteDetailScreen() {
     return () => {
       store.reset();
       setColor('');
+      if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
     };
   }, [note?.noteNo]);
 
-  const handleImageInsert = useCallback(async () => {
-    if (!user) return;
-    const uri = await pickImage();
-    if (!uri) return;
-    try {
-      const result = await uploadImage(uri, user.id, profile?.plan);
-      if (result?.url) {
-        editor.setImage(result.url);
-      }
-    } catch (e: any) {
-      console.error('Image upload failed:', e.message);
-    }
-  }, [user, profile, editor]);
-
-  const handleSave = useCallback(async () => {
-    if (!noteNo) return;
+  // Save function (reusable)
+  const performSave = useCallback(async (showToast = true) => {
+    if (!noteNo || isSavingRef.current) return;
+    isSavingRef.current = true;
     try {
       const content = await editor.getHTML();
       const plainText = htmlToPlainText(content);
+
+      // 내용이 비어있으면 저장하지 않음
+      if (!store.title.trim() && !plainText.trim()) {
+        isSavingRef.current = false;
+        return;
+      }
+
       await saveNote.mutateAsync({
         noteNo,
         title: store.title,
@@ -120,18 +122,66 @@ export default function NoteDetailScreen() {
         alarmDatetime: store.alarmDatetime,
       });
       store.setIsDirty(false);
-      setSaveToast(true);
-      setTimeout(() => setSaveToast(false), 2000);
+      if (showToast) {
+        setSaveToast(true);
+        setTimeout(() => setSaveToast(false), 2000);
+      }
     } catch (e: any) {
       console.error('[Save] failed:', e?.message || e);
-      if (Platform.OS === 'web') {
-        window.alert('저장 실패: ' + (e?.message || '알 수 없는 오류'));
-      }
+    } finally {
+      isSavingRef.current = false;
     }
   }, [noteNo, editor, store, saveNote]);
 
+  // 자동 저장: 제목이나 내용 변경 시 3초 디바운스
+  const triggerAutoSave = useCallback(() => {
+    if (!editable) return;
+    store.setIsDirty(true);
+    if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
+    autoSaveTimer.current = setTimeout(() => {
+      performSave(false);
+    }, AUTO_SAVE_DELAY);
+  }, [editable, performSave, store]);
+
+  // 제목 변경 시 자동 저장 트리거
+  const handleTitleChange = useCallback((text: string) => {
+    store.setTitle(text);
+    triggerAutoSave();
+  }, [store, triggerAutoSave]);
+
+  // 뒤로가기: dirty면 자동 저장 후 이동
+  const handleBack = useCallback(async () => {
+    if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
+
+    if (editable && store.isDirty) {
+      await performSave(false);
+    }
+
+    if (router.canGoBack()) {
+      router.back();
+    } else {
+      router.replace('/');
+    }
+  }, [editable, store.isDirty, performSave, router]);
+
+  const handleImageInsert = useCallback(async () => {
+    if (!user) return;
+    const uri = await pickImage();
+    if (!uri) return;
+    try {
+      const result = await uploadImage(uri, user.id, profile?.plan);
+      if (result?.url) {
+        editor.setImage(result.url);
+        triggerAutoSave();
+      }
+    } catch (e: any) {
+      console.error('Image upload failed:', e.message);
+    }
+  }, [user, profile, editor, triggerAutoSave]);
+
   const handleDelete = async () => {
     if (!noteNo) return;
+    if (autoSaveTimer.current) clearTimeout(autoSaveTimer.current);
     await softDelete.mutateAsync(noteNo);
     router.back();
   };
@@ -152,13 +202,21 @@ export default function NoteDetailScreen() {
 
   const handleAlarmSet = (datetime: string) => {
     store.setAlarmDatetime(datetime);
-    store.setIsDirty(true);
+    triggerAutoSave();
   };
 
   const handleAlarmClear = () => {
     store.setAlarmDatetime(null);
-    store.setIsDirty(true);
+    triggerAutoSave();
   };
+
+  // 히스토리에서 복원 후 에디터 업데이트
+  const handleHistoryRestore = useCallback(() => {
+    // noteDetail 쿼리가 invalidate되면 useEffect에서 editor.setContent가 호출됨
+    setShowHistory(false);
+    setSaveToast(true);
+    setTimeout(() => setSaveToast(false), 2000);
+  }, []);
 
   if (isLoading) {
     return (
@@ -184,13 +242,15 @@ export default function NoteDetailScreen() {
       <SafeAreaView style={[styles.container, { backgroundColor: bgColor }]}>
         {editable ? (
           <NoteDetailHeader
-            onSave={handleSave}
+            onSave={() => performSave(true)}
+            onBack={handleBack}
             isSaving={saveNote.isPending}
             isNew={false}
             onDelete={handleDelete}
             onTogglePublic={handleTogglePublic}
             onToggleColor={() => setShowColorPicker(true)}
             onSetAlarm={() => setShowAlarmModal(true)}
+            onShowHistory={() => setShowHistory(true)}
             isPublic={store.isPublic}
           />
         ) : (
@@ -212,7 +272,7 @@ export default function NoteDetailScreen() {
               placeholder="제목"
               placeholderTextColor="#999"
               value={store.title}
-              onChangeText={store.setTitle}
+              onChangeText={handleTitleChange}
               multiline
               maxLength={200}
             />
@@ -261,6 +321,16 @@ export default function NoteDetailScreen() {
           onClear={handleAlarmClear}
           onClose={() => setShowAlarmModal(false)}
         />
+
+        {/* History modal */}
+        {noteNo && (
+          <NoteHistoryModal
+            visible={showHistory}
+            noteNo={noteNo}
+            onRestore={handleHistoryRestore}
+            onClose={() => setShowHistory(false)}
+          />
+        )}
 
         {/* Save toast */}
         {saveToast && (

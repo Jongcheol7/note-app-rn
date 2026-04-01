@@ -60,11 +60,11 @@ export default function NoteWriteScreen() {
     }
   }, [user, profile, editor]);
 
-  const handleSave = useCallback(async () => {
+  const performSave = useCallback(async () => {
     const content = await editor.getHTML();
     const plainText = htmlToPlainText(content);
 
-    if (!store.title.trim() && !plainText.trim()) return;
+    if (!store.title.trim() && !plainText.trim()) return false;
 
     try {
       await saveNoteMutation.mutateAsync({
@@ -77,11 +77,27 @@ export default function NoteWriteScreen() {
         alarmDatetime: store.alarmDatetime,
       });
       store.reset();
-      router.back();
+      return true;
     } catch (e) {
       console.error('Save failed:', e);
+      return false;
     }
-  }, [editor, store, saveNoteMutation, router]);
+  }, [editor, store, saveNoteMutation]);
+
+  const handleSave = useCallback(async () => {
+    const saved = await performSave();
+    if (saved) router.back();
+  }, [performSave, router]);
+
+  // 뒤로가기: 내용이 있으면 자동 저장
+  const handleBack = useCallback(async () => {
+    await performSave();
+    if (router.canGoBack()) {
+      router.back();
+    } else {
+      router.replace('/');
+    }
+  }, [performSave, router]);
 
   const bgColor = store.selectedColor || (isDark ? '#000' : '#fff');
   const isWeb = Platform.OS === 'web';
@@ -91,6 +107,7 @@ export default function NoteWriteScreen() {
       <SafeAreaView style={[styles.container, { backgroundColor: bgColor }]}>
         <NoteDetailHeader
           onSave={handleSave}
+          onBack={handleBack}
           isSaving={saveNoteMutation.isPending}
           isNew
         />
