@@ -114,7 +114,6 @@ export default function NoteWriteScreen() {
           bgColor={bgColor}
         />
 
-        <View style={isWeb ? styles.webContent : undefined}>
         <CategorySelector />
 
         <TextInput
@@ -129,7 +128,6 @@ export default function NoteWriteScreen() {
 
         <View style={styles.editorContainer}>
           <NoteEditorView editor={editor} showToolbar={false} />
-        </View>
         </View>
 
         {Platform.OS === 'web' ? (

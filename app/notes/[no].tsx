@@ -242,7 +242,7 @@ export default function NoteDetailScreen() {
         <ScrollView
           style={styles.content}
           keyboardDismissMode="interactive"
-          contentContainerStyle={isWeb ? styles.webContent : undefined}
+          contentContainerStyle={undefined}
         >
           {editable ? (
             <TextInput

@@ -27,6 +27,7 @@ export default function CategorySelector() {
       horizontal
       showsHorizontalScrollIndicator={false}
       contentContainerStyle={styles.container}
+      style={styles.scroll}
     >
       {items.map((cat) => {
         const isActive = cat.categoryNo === selectedCategoryNo;
@@ -65,6 +66,9 @@ export default function CategorySelector() {
 }
 
 const styles = StyleSheet.create({
+  scroll: {
+    flexGrow: 0,
+  },
   container: {
     paddingHorizontal: 16,
     paddingVertical: 6,
