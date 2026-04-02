@@ -26,6 +26,7 @@ interface Props {
   onSetAlarm?: () => void;
   onShowHistory?: () => void;
   isPublic?: boolean;
+  bgColor?: string;
 }
 
 const NOTE_COLORS = [
@@ -45,6 +46,7 @@ export default function NoteDetailHeader({
   onSetAlarm,
   onShowHistory,
   isPublic,
+  bgColor,
 }: Props) {
   const router = useRouter();
   const isDark = useColorScheme() === 'dark';
@@ -68,7 +70,7 @@ export default function NoteDetailHeader({
       style={[
         styles.header,
         {
-          backgroundColor: isDark ? '#000' : '#fff',
+          backgroundColor: bgColor || (isDark ? '#000' : '#fff'),
           borderBottomColor: isDark ? '#333' : '#eee',
         },
       ]}
@@ -215,7 +217,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 12,
+    paddingHorizontal: 16,
     paddingVertical: 10,
     borderBottomWidth: 1,
   },

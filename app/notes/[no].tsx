@@ -214,7 +214,8 @@ export default function NoteDetailScreen() {
 
   return (
     <AuthGuard showLogin>
-      <SafeAreaView style={[styles.container, { backgroundColor: bgColor }]}>
+      <SafeAreaView style={[styles.container, { backgroundColor: bgColor, alignItems: 'center' }]}>
+        <View style={styles.outerWrap}>
         {editable ? (
           <NoteDetailHeader
             onSave={() => performSave(true)}
@@ -227,12 +228,14 @@ export default function NoteDetailScreen() {
             onSetAlarm={() => setShowAlarmModal(true)}
             onShowHistory={() => setShowHistory(true)}
             isPublic={store.isPublic}
+            bgColor={bgColor}
           />
         ) : (
           <NoteDetailHeader
             onSave={() => {}}
             isSaving={false}
             isNew={false}
+            bgColor={bgColor}
           />
         )}
 
@@ -269,7 +272,7 @@ export default function NoteDetailScreen() {
 
         {editable && (
           Platform.OS === 'web' ? (
-            <WebToolbar onImagePress={handleImageInsert} />
+            <WebToolbar onImagePress={handleImageInsert} bgColor={bgColor} />
           ) : (
             <KeyboardAvoidingView
               behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -313,6 +316,7 @@ export default function NoteDetailScreen() {
             <Text style={styles.toastText}>✓ 저장되었습니다</Text>
           </View>
         )}
+        </View>
       </SafeAreaView>
     </AuthGuard>
   );
@@ -321,6 +325,11 @@ export default function NoteDetailScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  outerWrap: {
+    flex: 1,
+    width: '100%',
+    maxWidth: Platform.OS === 'web' ? 1200 : undefined,
   },
   content: {
     flex: 1,
@@ -333,7 +342,7 @@ const styles = StyleSheet.create({
   titleInput: {
     fontSize: 24,
     fontWeight: '700',
-    paddingHorizontal: 20,
+    paddingHorizontal: 16,
     paddingTop: 20,
     paddingBottom: 10,
     outlineStyle: 'none',
@@ -341,7 +350,7 @@ const styles = StyleSheet.create({
   titleText: {
     fontSize: 24,
     fontWeight: '700',
-    paddingHorizontal: 20,
+    paddingHorizontal: 16,
     paddingTop: 20,
     paddingBottom: 10,
   },

@@ -8,6 +8,7 @@ import {
   StyleSheet,
   useColorScheme,
   ActivityIndicator,
+  Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -41,7 +42,8 @@ export default function ChatListScreen() {
 
   return (
     <AuthGuard showLogin>
-      <SafeAreaView style={{ flex: 1, backgroundColor: isDark ? '#000' : '#fff' }} edges={['top']}>
+      <SafeAreaView style={[styles.outer, { backgroundColor: isDark ? '#000' : '#fff' }]} edges={['top']}>
+        <View style={styles.inner}>
         <View style={[styles.header, { borderBottomColor: isDark ? '#333' : '#eee' }]}>
           <Text style={[styles.headerTitle, { color: isDark ? '#fff' : '#000' }]}>채팅</Text>
         </View>
@@ -94,12 +96,22 @@ export default function ChatListScreen() {
             }}
           />
         )}
+        </View>
       </SafeAreaView>
     </AuthGuard>
   );
 }
 
 const styles = StyleSheet.create({
+  outer: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  inner: {
+    flex: 1,
+    width: '100%',
+    maxWidth: Platform.OS === 'web' ? 1200 : undefined,
+  },
   header: {
     paddingHorizontal: 16, paddingVertical: 12, borderBottomWidth: 1,
   },

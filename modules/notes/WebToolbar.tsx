@@ -22,9 +22,10 @@ const TEXT_COLORS = [
 
 interface WebToolbarProps {
   onImagePress?: () => void;
+  bgColor?: string;
 }
 
-export default function WebToolbar({ onImagePress }: WebToolbarProps) {
+export default function WebToolbar({ onImagePress, bgColor: noteBgColor }: WebToolbarProps) {
   const isDark = useColorScheme() === 'dark';
   const colors = useThemeColors();
   const [expanded, setExpanded] = useState(false);
@@ -122,7 +123,7 @@ export default function WebToolbar({ onImagePress }: WebToolbarProps) {
   const bgColor = isDark ? '#1a1a1a' : '#fff';
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.surface, borderTopColor: colors.border }]}>
+    <View style={[styles.container, { backgroundColor: noteBgColor || colors.surface, borderTopColor: colors.border }]}>
       {/* Row 1: Main tools */}
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.row}>
         <ToolBtn

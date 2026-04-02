@@ -9,6 +9,7 @@ import {
   useColorScheme,
   ActivityIndicator,
   Alert,
+  Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -102,7 +103,8 @@ export default function UserProfileScreen() {
 
   return (
     <AuthGuard showLogin>
-      <SafeAreaView style={{ flex: 1, backgroundColor: isDark ? '#000' : '#fff' }} edges={['top']}>
+      <SafeAreaView style={[styles.outer, { backgroundColor: isDark ? '#000' : '#fff' }]} edges={['top']}>
+        <View style={styles.inner}>
         {/* Header */}
         <View style={[styles.header, { borderBottomColor: isDark ? '#333' : '#eee' }]}>
           <Pressable onPress={() => router.back()} style={{ padding: 6 }} accessibilityLabel="뒤로 가기" accessibilityRole="button">
@@ -186,15 +188,25 @@ export default function UserProfileScreen() {
           onEndReached={() => hasNextPage && !isFetchingNextPage && fetchNextPage()}
           onEndReachedThreshold={0.3}
         />
+        </View>
       </SafeAreaView>
     </AuthGuard>
   );
 }
 
 const styles = StyleSheet.create({
+  outer: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  inner: {
+    flex: 1,
+    width: '100%',
+    maxWidth: Platform.OS === 'web' ? 1200 : undefined,
+  },
   header: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    paddingHorizontal: 12, paddingVertical: 10, borderBottomWidth: 1,
+    paddingHorizontal: 16, paddingVertical: 10, borderBottomWidth: 1,
   },
   headerTitle: { fontSize: 18, fontWeight: '700' },
   profileSection: { alignItems: 'center', paddingVertical: 24, paddingHorizontal: 16 },

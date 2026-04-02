@@ -104,12 +104,14 @@ export default function NoteWriteScreen() {
 
   return (
     <AuthGuard showLogin>
-      <SafeAreaView style={[styles.container, { backgroundColor: bgColor }]}>
+      <SafeAreaView style={[styles.container, { backgroundColor: bgColor, alignItems: 'center' }]}>
+        <View style={styles.outerWrap}>
         <NoteDetailHeader
           onSave={handleSave}
           onBack={handleBack}
           isSaving={saveNoteMutation.isPending}
           isNew
+          bgColor={bgColor}
         />
 
         <View style={isWeb ? styles.webContent : undefined}>
@@ -131,7 +133,7 @@ export default function NoteWriteScreen() {
         </View>
 
         {Platform.OS === 'web' ? (
-          <WebToolbar onImagePress={handleImageInsert} />
+          <WebToolbar onImagePress={handleImageInsert} bgColor={bgColor} />
         ) : (
           <KeyboardAvoidingView
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -140,6 +142,7 @@ export default function NoteWriteScreen() {
             <NoteToolbar editor={editor} onImagePress={handleImageInsert} />
           </KeyboardAvoidingView>
         )}
+        </View>
       </SafeAreaView>
     </AuthGuard>
   );
@@ -148,6 +151,11 @@ export default function NoteWriteScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  outerWrap: {
+    flex: 1,
+    width: '100%',
+    maxWidth: Platform.OS === 'web' ? 1200 : undefined,
   },
   webContent: {
     flex: 1,
@@ -164,7 +172,7 @@ const styles = StyleSheet.create({
   },
   editorContainer: {
     flex: 1,
-    paddingHorizontal: 12,
+    paddingHorizontal: 16,
   },
   toolbarWrapper: {
     position: 'absolute',

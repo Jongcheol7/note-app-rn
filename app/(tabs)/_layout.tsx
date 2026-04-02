@@ -1,6 +1,6 @@
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, Platform, useWindowDimensions } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/lib/AuthContext';
 import { useThemeColors } from '@/lib/theme';
@@ -22,6 +22,8 @@ function ChatIcon({ color, size, badge }: { color: string; size: number; badge: 
 export default function TabLayout() {
   const colors = useThemeColors();
   const { user } = useAuth();
+  const { width } = useWindowDimensions();
+  const tabBarPadding = Platform.OS === 'web' && width > 1200 ? (width - 1200) / 2 : 0;
 
   const { data: unreadCount = 0 } = useQuery({
     queryKey: ['unreadCount'],
@@ -39,6 +41,7 @@ export default function TabLayout() {
         tabBarStyle: {
           backgroundColor: colors.tabBar,
           borderTopColor: colors.tabBarBorder,
+          paddingHorizontal: tabBarPadding,
         },
       }}
     >

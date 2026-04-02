@@ -10,6 +10,7 @@ import {
   StyleSheet,
   useColorScheme,
   ActivityIndicator,
+  Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -133,9 +134,10 @@ export default function CategoryScreen() {
   return (
     <AuthGuard showLogin>
       <SafeAreaView
-        style={{ flex: 1, backgroundColor: isDark ? '#000' : '#fff' }}
+        style={[styles.outer, { backgroundColor: isDark ? '#000' : '#fff' }]}
         edges={['top']}
       >
+        <View style={styles.inner}>
         {/* Header */}
         <View
           style={[
@@ -263,17 +265,27 @@ export default function CategoryScreen() {
             </View>
           </Pressable>
         </Modal>
+        </View>
       </SafeAreaView>
     </AuthGuard>
   );
 }
 
 const styles = StyleSheet.create({
+  outer: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  inner: {
+    flex: 1,
+    width: '100%',
+    maxWidth: Platform.OS === 'web' ? 1200 : undefined,
+  },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 12,
+    paddingHorizontal: 16,
     paddingVertical: 10,
     borderBottomWidth: 1,
   },

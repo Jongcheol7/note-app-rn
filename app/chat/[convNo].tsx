@@ -118,7 +118,8 @@ export default function ChatRoomScreen() {
 
   return (
     <AuthGuard showLogin>
-      <SafeAreaView style={{ flex: 1, backgroundColor: isDark ? '#000' : '#fff' }}>
+      <SafeAreaView style={[styles.outer, { backgroundColor: isDark ? '#000' : '#fff' }]}>
+        <View style={styles.inner}>
         {/* Header */}
         <View style={[styles.header, { borderBottomColor: isDark ? '#333' : '#eee' }]}>
           <Pressable onPress={() => router.back()} style={{ padding: 6 }} accessibilityLabel="뒤로 가기" accessibilityRole="button">
@@ -140,7 +141,7 @@ export default function ChatRoomScreen() {
               ref={flatListRef}
               data={messagesWithDates}
               keyExtractor={(item) => item.id}
-              contentContainerStyle={{ paddingHorizontal: 12, paddingVertical: 8 }}
+              contentContainerStyle={{ paddingHorizontal: 16, paddingVertical: 8 }}
               renderItem={({ item }) => {
                 if (item.type === 'date') {
                   return (
@@ -198,15 +199,25 @@ export default function ChatRoomScreen() {
             </Pressable>
           </View>
         </KeyboardAvoidingView>
+        </View>
       </SafeAreaView>
     </AuthGuard>
   );
 }
 
 const styles = StyleSheet.create({
+  outer: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  inner: {
+    flex: 1,
+    width: '100%',
+    maxWidth: Platform.OS === 'web' ? 1200 : undefined,
+  },
   header: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
-    paddingHorizontal: 12, paddingVertical: 10, borderBottomWidth: 1,
+    paddingHorizontal: 16, paddingVertical: 10, borderBottomWidth: 1,
   },
   headerTitle: { fontSize: 18, fontWeight: '700' },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
@@ -222,7 +233,7 @@ const styles = StyleSheet.create({
   unreadBadge: { fontSize: 10, color: '#f59e0b', fontWeight: '700' },
   timeText: { fontSize: 10, color: '#999' },
   inputBar: {
-    flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12,
+    flexDirection: 'row', alignItems: 'center', paddingHorizontal: 16,
     paddingVertical: 8, borderTopWidth: 1, gap: 8,
   },
   input: { flex: 1, fontSize: 14, paddingHorizontal: 14, paddingVertical: 10, borderRadius: 20 },

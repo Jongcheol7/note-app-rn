@@ -37,13 +37,25 @@ export default function NoteLists() {
     isError,
   } = useNoteLists();
 
-  const notes = useMemo(
+  const rawNotes = useMemo(
     () => data?.pages.flatMap((page) => page.notes) ?? [],
     [data]
   );
 
   const isCommunity = menuFrom === 'community';
   const numColumns = isCommunity ? 1 : width > 1024 ? 4 : width > 768 ? 3 : 2;
+
+  // Pad last row with empty fillers so cards have consistent width
+  const notes = useMemo(() => {
+    if (isCommunity || rawNotes.length === 0) return rawNotes;
+    const remainder = rawNotes.length % numColumns;
+    if (remainder === 0) return rawNotes;
+    const fillers = Array.from({ length: numColumns - remainder }, (_, i) => ({
+      noteNo: `filler-${i}`,
+      _filler: true,
+    }));
+    return [...rawNotes, ...fillers];
+  }, [rawNotes, numColumns, isCommunity]);
   const togglePin = useTogglePin();
 
   const handleEndReached = useCallback(() => {
@@ -60,9 +72,12 @@ export default function NoteLists() {
   );
 
   const renderItem = useCallback(
-    ({ item }: { item: any }) => (
-      <NoteCard note={item} currentUserId={user?.id} onTogglePin={handleTogglePin} />
-    ),
+    ({ item }: { item: any }) => {
+      if (item._filler) return <View style={{ flex: 1, margin: 6 }} />;
+      return (
+        <NoteCard note={item} currentUserId={user?.id} onTogglePin={handleTogglePin} />
+      );
+    },
     [user?.id]
   );
 

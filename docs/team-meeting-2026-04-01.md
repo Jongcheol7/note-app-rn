@@ -16,8 +16,8 @@
 | 커스텀 훅 | — | 6개 | — |
 | 공유 컴포넌트 | — | 10개 | — |
 | 노트 모듈 컴포넌트 | — | 11개 | — |
-| Git 커밋 | 8개 | 14개 | +6 (4/1 작업분) |
-| 전체 완성도 | **약 60%** | **약 80%** | +20% |
+| Git 커밋 | 8개 | 15개 | +7 (4/1~4/2 작업분) |
+| 전체 완성도 | **약 60%** | **약 82%** | +22% |
 
 ### 3/31 대비 주요 진전
 
@@ -148,14 +148,14 @@ image, conversation, message, block, report, UserSettings
 
 #### 출시 전 남은 필수 항목
 
-| # | 항목 | 담당 | 긴급도 |
-|---|------|------|--------|
-| 1 | Sentry DSN 입력 | 개발 | **즉시** |
-| 2 | R2 버킷 생성 + Worker 배포 | 개발 | **즉시** |
-| 3 | 앱 아이콘 + 스토어 에셋 | 디자인 | **이번 주** |
-| 4 | `note_history` SQL 실행 | 개발 | **즉시** |
-| 5 | EAS Build 테스트 (APK) | 개발 | **이번 주** |
-| 6 | Play Store 내부 테스트 | PM | **다음 주** |
+| # | 항목 | 담당 | 긴급도 | 상태 |
+|---|------|------|--------|------|
+| 1 | Sentry DSN 입력 | 개발 | **이번 주** | ⏳ 계정 가입 필요 |
+| 2 | ~~R2 버킷 생성 + Worker 배포~~ | 개발 | ~~즉시~~ | ✅ 완료 (4/1) |
+| 3 | 앱 아이콘 + 스토어 에셋 | 디자인 | **이번 주** | ⏳ |
+| 4 | ~~`note_history` SQL 실행~~ | 개발 | ~~즉시~~ | ✅ 완료 (4/1) |
+| 5 | EAS Build 테스트 (APK) | 개발 | **이번 주** | ⏳ Expo 로그인 필요 |
+| 6 | Play Store 내부 테스트 | PM | **다음 주** | ⏳ |
 
 ### 출시 목표 일정 (수정)
 
@@ -273,15 +273,17 @@ image, conversation, message, block, report, UserSettings
 ### 즉시 실행 (오늘)
 
 1. ~~자동 저장 + 히스토리 구현~~ ✅ 완료
-2. Supabase에 `note_history` SQL 실행
-3. ErrorBoundary에 Sentry.captureException 추가
+2. ~~Supabase에 `note_history` SQL 실행~~ ✅ 완료 (4/1)
+3. ErrorBoundary에 Sentry.captureException 추가 (Sentry DSN 설정 후)
 
 ### 이번 주 (4/2~4/4)
 
 1. Sentry 계정 생성 + DSN 입력
-2. Cloudflare R2 버킷 + Worker 배포
-3. EAS Build 테스트 (Android APK)
-4. 앱 아이콘 + 스토어 에셋 제작 (디자인팀)
+2. ~~Cloudflare R2 버킷 + Worker 배포~~ ✅ 완료 (4/1) — 이미지 삭제 연동 포함
+3. ~~카테고리 필터 버그 수정~~ ✅ 완료 (4/2) — Supabase !inner 조인 적용
+4. ~~웹 레이아웃 통일~~ ✅ 완료 (4/2) — 전 페이지 maxWidth:1200 + paddingHorizontal:16 + 노트 상세 배경색 통일
+5. EAS Build 테스트 (Android APK)
+6. 앱 아이콘 + 스토어 에셋 제작 (디자인팀)
 
 ### 다음 주 (4/7~4/11)
 

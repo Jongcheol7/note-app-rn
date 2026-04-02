@@ -1,5 +1,5 @@
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useColorScheme } from 'react-native';
+import { View, StyleSheet, Platform, useColorScheme } from 'react-native';
 import { useEffect } from 'react';
 import { AuthGuard } from '@/components/AuthGuard';
 import { useFromStore } from '@/store/useFromStore';
@@ -22,11 +22,25 @@ export default function TrashScreen() {
   return (
     <AuthGuard showLogin>
       <SafeAreaView
-        style={{ flex: 1, backgroundColor: isDark ? '#000' : '#fff' }}
+        style={[trashStyles.outer, { backgroundColor: isDark ? '#000' : '#fff' }]}
         edges={['top']}
       >
-        <TrashList />
+        <View style={trashStyles.inner}>
+          <TrashList />
+        </View>
       </SafeAreaView>
     </AuthGuard>
   );
 }
+
+const trashStyles = StyleSheet.create({
+  outer: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  inner: {
+    flex: 1,
+    width: '100%',
+    maxWidth: Platform.OS === 'web' ? 1200 : undefined,
+  },
+});

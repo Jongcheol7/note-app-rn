@@ -1,4 +1,4 @@
-import { View, Text, Pressable, useColorScheme } from 'react-native';
+import { View, Text, Pressable, useColorScheme, StyleSheet, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -25,8 +25,9 @@ export default function MoreScreen() {
   ];
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: isDark ? '#000' : '#fff' }}>
-      <View style={{ padding: 20 }}>
+    <SafeAreaView style={[moreStyles.outer, { backgroundColor: isDark ? '#000' : '#fff' }]}>
+      <View style={moreStyles.inner}>
+      <View style={{ paddingHorizontal: 16, paddingVertical: 20 }}>
         <Text style={{ fontSize: 22, fontWeight: 'bold', color: isDark ? '#fff' : '#000', marginBottom: 20 }}>
           더보기
         </Text>
@@ -73,6 +74,19 @@ export default function MoreScreen() {
           </Text>
         </Pressable>
       </View>
+      </View>
     </SafeAreaView>
   );
 }
+
+const moreStyles = StyleSheet.create({
+  outer: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  inner: {
+    flex: 1,
+    width: '100%',
+    maxWidth: Platform.OS === 'web' ? 1200 : undefined,
+  },
+});

@@ -40,13 +40,18 @@ export async function fetchNotes({
   categoryName,
   userId,
 }: NoteListParams) {
+  const categoryJoin =
+    categoryName && menuFrom !== 'community'
+      ? 'category!categoryNo!inner (categoryNo, name)'
+      : 'category:categoryNo (categoryNo, name)';
+
   let query = supabase
     .from('note')
     .select(
       `
       *,
       user:userId (id, name, email, image, nickname, profileImage),
-      category:categoryNo (categoryNo, name),
+      ${categoryJoin},
       like (likeNo, userId),
       comment (commentNo)
     `
